@@ -11,12 +11,15 @@ from wtforms.validators import DataRequired
 
 from flask_ckeditor import CKEditor, CKEditorField
 
+from ai_blog.tts import create_mp3
+
 bp = Blueprint('blog', __name__)
 
 class PostForm(FlaskForm):
     title = StringField('Title')
     slug = StringField('Slug')
     body = CKEditorField('Body', validators=[DataRequired()])
+    voice = StringField('Voice')
     submit = SubmitField('Submit')
 
 @bp.route('/')
@@ -34,6 +37,7 @@ def create():
         title = form.title.data
         slug = form.slug.data
         body = form.body.data
+        voice = form.voice.data
         error = None
 
         if not title:
@@ -42,11 +46,20 @@ def create():
         if error is not None:
             flash(error)
         else:
+
             db = get_db()
-            db.execute(
+            result = db.execute(
                 'INSERT INTO post (title, slug, body)'
                 ' VALUES (?, ?, ?)',
                 (title, slug, body)
+            )
+            db.commit()
+            id = result.lastrowid
+            audio = create_mp3(id, slug, body, voice)
+            db.execute(
+                'UPDATE post SET audio = ?'
+                'WHERE id = ?',
+                (audio, id)
             )
             db.commit()
             return redirect(url_for('blog.index'))
