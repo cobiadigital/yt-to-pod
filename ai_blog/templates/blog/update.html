@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}Edit "{{ post['title'] }}"{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+<div>
+      <form method="post">
+          {{ form.csrf_token }}
+          {{ form.title.label }}<br>
+          {{ form.title(class_="form-control")}}<br>
+          {{ form.slug.label }}<br>
+          {{ form.slug(class_="form-control")}}<br><br>
+          {{ form.body.label }}<br>
+          {{ form.body(class_="form-control")}}
+          <br>
+      {{ form.submit }}
+      </form>
+  </div>
+  <hr>
+{{ ckeditor.load() }}
+{{ ckeditor.config(name='body') }}
+{% endblock %}
