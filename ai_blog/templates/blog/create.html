@@ -20,6 +20,9 @@
 		{{ form.submit }}
 		</form>
     </div>
+  <form action="{{ url_for('blog.voices') }}" method="post">
+    <input type="submit" value="Update Available Voices" >
+  </form>
 	{{ ckeditor.load() }}
 	{{ ckeditor.config(name='body') }}
 {% endblock %}

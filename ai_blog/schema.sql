@@ -6,5 +6,6 @@ CREATE TABLE post (
   title TEXT NOT NULL,
   slug TEXT NOT NULL,
   body TEXT NOT NULL,
+  voice TEXT,
   audio TEXT
 );

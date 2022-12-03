@@ -1,5 +1,4 @@
 import azure.cognitiveservices.speech as speechsdk
-import json
 import bs4
 import re
 import os
@@ -16,7 +15,7 @@ def pollytext(content, voice):
     emphasis = soup(["em","i"])
     for emph in emphasis:
         emph.name = "emphasis"
-        emph['level'] = "moderate"
+        emph['level'] = "strong"
 
     text = ""
 
@@ -70,17 +69,6 @@ def pollytext(content, voice):
         text.write(str(textBlocks))
     return textBlocks
 
-def get_keys(path):
-    with open(path) as f:
-        return json.load(f)
-keys = get_keys(".secret/azure.json")
-subscription_key = keys['subscription']
-service_region = keys['region']
-speech_config = speechsdk.SpeechConfig(subscription=subscription_key, region=service_region)
-speech_config.set_speech_synthesis_output_format(speechsdk.SpeechSynthesisOutputFormat.Audio16Khz32KBitRateMonoMp3)# The language of the voice that speaks.
-
-speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config)
-
 # Get text from the console and synthesize to the default speaker.
 
 
@@ -88,7 +76,7 @@ def synthesize_ssml(speech_config, response, voice):
     textBlocks = pollytext(response, voice)
     audio_data_list = []
     for textBlock in textBlocks:
-        result = speech_synthesizer.speak_ssml_async(textBlock).get()
+        result = speach_client.speak_ssml_async(textBlock).get()
         if result.reason == speechsdk.ResultReason.SynthesizingAudioCompleted:
             print(textBlock)
             print("Speech synthesized for text")
@@ -104,8 +92,8 @@ def synthesize_ssml(speech_config, response, voice):
             break
     return b"".join(audio_data_list)
 
-def create_mp3(id, slug, body, voice):
-    audio_content = synthesize_ssml(speech_config, body, voice)
+def create_mp3(id, slug, body, voice, client):
+    audio_content = synthesize_ssml(speech_config, body, voice, client)
     mp3_name = "instance/" + str(id) + "_" + slug + ".mp3"
     with open(mp3_name, "wb") as out:
     # Write the response to the output file.

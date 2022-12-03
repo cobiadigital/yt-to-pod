@@ -18,6 +18,8 @@
         </div>
       </header>
       <p class="body text-start">{{ post['body']|safe }}</p>
+      <p><a href="instance/{{ post['audio']}}">{{ post['audio']}}</a></p>
+
       </div>
     </article>
     {% if not loop.last %}

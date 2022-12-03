@@ -12,27 +12,46 @@ from wtforms.validators import DataRequired
 from flask_ckeditor import CKEditor, CKEditorField
 
 from ai_blog.tts import create_mp3
+from ai_blog.tts_voices import get_voices
+from ai_blog.load_azure_client import load_speech_client
 
 bp = Blueprint('blog', __name__)
+
+speech_client = load_speech_client()
 
 class PostForm(FlaskForm):
     title = StringField('Title')
     slug = StringField('Slug')
     body = CKEditorField('Body', validators=[DataRequired()])
-    voice = StringField('Voice')
+    voice = SelectField('Voice', coerce=int)
     submit = SubmitField('Submit')
+
 
 @bp.route('/')
 def index():
     db = get_db()
     posts = db.execute(
-        'SELECT p.id, title, body, created FROM post p ORDER BY created DESC'
+        'SELECT p.id, title, body, voice, created FROM post p ORDER BY created DESC'
     ).fetchall()
     return render_template('blog/index.html', posts=posts)
+
+@bp.route('/voices', methods=('POST',))
+def voices():
+    voices_list = get_voices(speech_client)
+    db = get_db()
+    db.execute('REPLACE INTO settings (key, value) VALUES(?, ?);', ('voices', voices_list))
+    db.commit()
+    return redirect(request.url)
 
 @bp.route('/create', methods=('GET', 'POST'))
 def create():
     form = PostForm()
+    db = get_db()
+    voice_list = db.execute(
+        'SELECT value FROM settings WHERE key = ?;'('voices')
+    ).fetchall()
+    form.voice.choices = [(voice_list)]
+
     if request.method == 'POST':
         title = form.title.data
         slug = form.slug.data
@@ -55,7 +74,7 @@ def create():
             )
             db.commit()
             id = result.lastrowid
-            audio = create_mp3(id, slug, body, voice)
+            audio = create_mp3(id, slug, body, voice, speech_client)
             db.execute(
                 'UPDATE post SET audio = ?'
                 'WHERE id = ?',
