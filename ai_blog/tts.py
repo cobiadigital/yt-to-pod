@@ -95,7 +95,7 @@ def synthesize_ssml(speech_client, body, voice):
 
 def create_mp3(id, slug, body, voice, speech_client):
     audio_content = synthesize_ssml(speech_client, body, voice)
-    mp3_name = "instance/" + str(id) + "_" + slug + ".mp3"
+    mp3_name = "instance/audio/" + str(id) + "_" + slug + ".mp3"
     with open(mp3_name, "wb") as out:
     # Write the response to the output file.
         out.write(audio_content)
