@@ -20,8 +20,8 @@
 		{{ form.submit }}
 		</form>
     </div>
-  <form action="{{ url_for('blog.voices') }}" method="post">
-    <input type="submit" value="Update Available Voices" >
+  <form method="post" action="{{ url_for('blog.voices') }}">
+    <input type="submit" value="Update Voices" name="updated_voices" value="1" >
   </form>
 	{{ ckeditor.load() }}
 	{{ ckeditor.config(name='body') }}

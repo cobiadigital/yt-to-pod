@@ -5,9 +5,9 @@ import os
 import time
 
 
-def pollytext(content, voice):
+def pollytext(body, voice):
 
-    soup = bs4.BeautifulSoup(content, "html")
+    soup = bs4.BeautifulSoup(body, "html.parser")
     hr_tags = soup("hr")
     for hr_tag in hr_tags:
         hr_tag.name = "break"
@@ -72,11 +72,12 @@ def pollytext(content, voice):
 # Get text from the console and synthesize to the default speaker.
 
 
-def synthesize_ssml(speech_config, response, voice):
-    textBlocks = pollytext(response, voice)
+def synthesize_ssml(speech_client, body, voice):
+    print(voice)
+    textBlocks = pollytext(body, voice)
     audio_data_list = []
     for textBlock in textBlocks:
-        result = speach_client.speak_ssml_async(textBlock).get()
+        result = speech_client.speak_ssml_async(textBlock).get()
         if result.reason == speechsdk.ResultReason.SynthesizingAudioCompleted:
             print(textBlock)
             print("Speech synthesized for text")
@@ -92,8 +93,8 @@ def synthesize_ssml(speech_config, response, voice):
             break
     return b"".join(audio_data_list)
 
-def create_mp3(id, slug, body, voice, client):
-    audio_content = synthesize_ssml(speech_config, body, voice, client)
+def create_mp3(id, slug, body, voice, speech_client):
+    audio_content = synthesize_ssml(speech_client, body, voice)
     mp3_name = "instance/" + str(id) + "_" + slug + ".mp3"
     with open(mp3_name, "wb") as out:
     # Write the response to the output file.
