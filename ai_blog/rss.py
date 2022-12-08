@@ -41,6 +41,6 @@ def build_rss(posts):
         fe.id(post['slug'])
         fe.title(post['title'])
         fe.description(post['body'])
-        fe.enclosure(os.path.join(current_app, post['audio']), 0, 'audio/mpeg')
+        fe.enclosure(current_app.instance_path + "audio/" + post['audio'], 0, 'audio/mpeg')
     return(fg)
 

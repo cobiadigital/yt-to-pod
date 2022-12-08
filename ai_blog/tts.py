@@ -4,6 +4,7 @@ import re
 import os
 import time
 
+from flask import current_app
 
 def pollytext(body, voice):
 
@@ -73,7 +74,6 @@ def pollytext(body, voice):
 
 
 def synthesize_ssml(speech_client, body, voice):
-    print(voice)
     textBlocks = pollytext(body, voice)
     audio_data_list = []
     for textBlock in textBlocks:
@@ -95,8 +95,9 @@ def synthesize_ssml(speech_client, body, voice):
 
 def create_mp3(id, slug, body, voice, speech_client):
     audio_content = synthesize_ssml(speech_client, body, voice)
-    mp3_name = "instance/audio/" + str(id) + "_" + slug + ".mp3"
-    with open(mp3_name, "wb") as out:
+    mp3_name = str(id) + "_" + slug + ".mp3"
+    mp3_path = current_app.instance_path + "/audio/" + mp3_name
+    with open(mp3_path, "wb") as out:
     # Write the response to the output file.
         out.write(audio_content)
         print('Audio content written to file' + mp3_name)
