@@ -11,5 +11,6 @@ htmlcov/
 
 dist/
 build/
+upload/
 .secret/
 *.egg-info/
