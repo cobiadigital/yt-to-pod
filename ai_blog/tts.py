@@ -4,7 +4,7 @@ import re
 import os
 import time
 
-from flask import current_app
+from flask import current_app, url_for
 
 def pollytext(body, voice):
 
@@ -96,10 +96,10 @@ def synthesize_ssml(speech_client, body, voice):
 def create_mp3(id, slug, body, voice, speech_client):
     audio_content = synthesize_ssml(speech_client, body, voice)
     mp3_name = str(id) + "_" + slug + ".mp3"
-    mp3_path = current_app.instance_path + "/audio/" + mp3_name
+    mp3_path = os.path.join(current_app.config['UPLOAD_FOLDER'],'audio', mp3_name)
     with open(mp3_path, "wb") as out:
     # Write the response to the output file.
         out.write(audio_content)
-        print('Audio content written to file' + mp3_name)
+        print('Audio content written to file ' + mp3_name)
     return mp3_name
 

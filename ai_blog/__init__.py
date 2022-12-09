@@ -4,6 +4,7 @@ from flask import Flask
 from flask_ckeditor import CKEditor
 
 ckeditor = CKEditor()
+UPLOAD_FOLDER = 'upload/'
 
 def create_app(test_config=None):
     # create and configure the app
@@ -12,6 +13,8 @@ def create_app(test_config=None):
         SECRET_KEY='dev',
         DATABASE=os.path.join(app.instance_path, 'ai_blog.sqlite'),
     )
+
+    app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
     ckeditor.init_app(app)
 
@@ -27,6 +30,8 @@ def create_app(test_config=None):
         os.makedirs(app.instance_path)
     except OSError:
         pass
+
+
 
     from . import db
     db.init_app(app)

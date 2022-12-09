@@ -19,7 +19,8 @@ to go (i.e. http://<ipaddr>/index.xml).
 """
 import os
 from feedgen.feed import FeedGenerator
-from flask import (url_for, current_app)
+from flask import (request, url_for, current_app)
+
 
 # Build an RSS feed and load the podcasst extension
 def build_rss(posts):
@@ -31,7 +32,7 @@ def build_rss(posts):
         {'cat': 'Health &amp; Fitness', 'sub': 'Mental Health'},
     ])
     fg.podcast.itunes_complete('yes')
-    fg.podcast.itunes_image(os.path.join(current_app.instance_path, 'podcast_image.jpg'))
+    fg.podcast.itunes_image(url_for('static', filename='podcast_image.jpg'))
     fg.title('Appreciative Narrative Daily Thought')
     fg.podcast.itunes_subtitle('Starting your day with a moment of appreciation')
     fg.description("""Adapting Appreciative Inquiry and Narrative Therapy into a daily transformative practice""")
@@ -41,6 +42,6 @@ def build_rss(posts):
         fe.id(post['slug'])
         fe.title(post['title'])
         fe.description(post['body'])
-        fe.enclosure(current_app.instance_path + "audio/" + post['audio'], 0, 'audio/mpeg')
+        fe.enclosure( request.base_url('blog.audio_file', name = post['audio']), 0, 'audio/mpeg')
     return(fg)
 

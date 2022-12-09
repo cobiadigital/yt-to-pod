@@ -1,6 +1,6 @@
 #Load Flask modules
 from flask import (
-    Blueprint, flash, g, redirect, Response, render_template, request, url_for
+    Blueprint, flash, g, redirect, Response, render_template, request, url_for, send_from_directory
 )
 from werkzeug.exceptions import abort
 
@@ -47,6 +47,10 @@ def index():
         'SELECT p.id, title, body, voice, created FROM post p ORDER BY created DESC'
     ).fetchall()
     return render_template('blog/index.html', posts=posts)
+
+@bp.route('/audio/<name>')
+def audio_file(name):
+    return send_from_directory(app.config["UPLOAD_FOLDER"], 'audio', name)
 
 @bp.route('/voices', methods=('POST',))
 def voices():
