@@ -42,6 +42,6 @@ def build_rss(posts):
         fe.id(post['slug'])
         fe.title(post['title'])
         fe.description(post['body'])
-        fe.enclosure( request.base_url('blog.audio_file', name = post['audio']), 0, 'audio/mpeg')
+        fe.enclosure( request.url_root + 'audio/' + post['audio'],  0, 'audio/mpeg')
     return(fg)
 
