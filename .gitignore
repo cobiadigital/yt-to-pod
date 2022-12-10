@@ -10,7 +10,6 @@ instance/
 htmlcov/
 
 dist/
-build/
 upload/
 ai_blog/build/ckeditor/
 .secret/
