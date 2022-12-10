@@ -42,6 +42,6 @@ def build_rss(posts):
         fe.id(post['slug'])
         fe.title(post['title'])
         fe.description(post['body'])
-        fe.enclosure( 'https://pub-b8ece8437a89409c96495d8ab9b985af.r2.dev/' + post['audio'],  0, 'audio/mpeg')
+        fe.enclosure( 'https://audio.cobiadigital.com/' + post['audio'],  0, 'audio/mpeg')
     return(fg)
 
