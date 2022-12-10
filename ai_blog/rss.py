@@ -32,7 +32,7 @@ def build_rss(posts):
         {'cat': 'Health &amp; Fitness', 'sub': 'Mental Health'},
     ])
     fg.podcast.itunes_complete('yes')
-    fg.podcast.itunes_image(url_for('static', filename='appreciative_narrative.png'))
+    fg.podcast.itunes_image(url_for('static', filename='appreciative_narrative.png', _external=True))
     fg.title('Appreciative Narrative Daily Thought')
     fg.podcast.itunes_subtitle('Starting your day with a moment of appreciation')
     fg.description("""Adapting Appreciative Inquiry and Narrative Therapy into a daily transformative practice""")

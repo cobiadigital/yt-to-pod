@@ -16,7 +16,7 @@
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
             <li class="nav-item">
-                <li><a href="index.html">Home</a></li>
+                <li><a href="/">Home</a></li>
             </li>
           </ul>
         </div>
@@ -35,7 +35,7 @@
   
 <div>
  		<form method="post">
-			<input id="csrf_token" name="csrf_token" type="hidden" value="IjRiZjhjMjUzZDk5M2YwNTViODM3NzZhZDgxYzEzMjQxMDNkN2NkZTQi.Y5UMUA.hpowviMCMldt-eurmJgN7vJYs2w">
+			<input id="csrf_token" name="csrf_token" type="hidden" value="Ijc0Y2RhOWI3Y2Q4MmEyYzMwZTdlNjVjZjNlNDM3OGE1OTliNTgzMGEi.Y5UUYw.ER5gRcxGdR2RjX4_HcOmI8RW_DY">
 			<label for="title">Title</label><br>
 			<input class="form-control" id="title" name="title" type="text" value=""><br>
 			<label for="slug">Slug</label><br>
@@ -49,7 +49,7 @@
 		<input id="submit" name="submit" type="submit" value="Submit">
 		</form>
     </div>
-  <form method="post" action="voices">
+  <form method="post" action="/voices">
     <input type="submit" value="Update Voices" name="updated_voices" value="1" >
   </form>
 	<script src="https://cdn.ckeditor.com/4.14.0/standard/ckeditor.js"></script>
