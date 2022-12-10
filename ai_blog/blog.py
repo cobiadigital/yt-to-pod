@@ -33,8 +33,8 @@ class PostForm(FlaskForm):
     submit = SubmitField('Submit')
 
 
-@bp.route('/rss/index.xml')
-def get_feed():
+@bp.route('/index.xml')
+def rss():
     db = get_db()
     posts = db.execute(
         'SELECT p.id, title, slug, body, voice, audio, created FROM post p ORDER BY created DESC'
