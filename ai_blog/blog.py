@@ -1,9 +1,10 @@
 #Load Flask modules
 from flask import (
-    Blueprint, flash, g, redirect, Response, render_template, request, url_for, send_from_directory
+    Blueprint, flash, g, redirect, Response, render_template, request, url_for, send_from_directory,
+    current_app, send_file
 )
 from werkzeug.exceptions import abort
-
+import os
 #Load 3rd Party
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, SelectField
@@ -17,6 +18,7 @@ from ai_blog.tts import create_mp3
 from ai_blog.tts_voices import get_voices
 from ai_blog.load_azure_client import load_speech_client, get_keys
 from ai_blog.rss import build_rss
+from flask_frozen import Freezer
 
 
 bp = Blueprint('blog', __name__)
@@ -31,7 +33,7 @@ class PostForm(FlaskForm):
     submit = SubmitField('Submit')
 
 
-@bp.route('/index.xml')
+@bp.route('/rss/index.xml')
 def get_feed():
     db = get_db()
     posts = db.execute(
@@ -48,18 +50,15 @@ def index():
     ).fetchall()
     return render_template('blog/index.html', posts=posts)
 
-@bp.route('/audio/<name>')
-def audio_file(name):
-    return send_from_directory(app.config["UPLOAD_FOLDER"], 'audio', name)
-
-@bp.route('/voices', methods=('POST',))
+@bp.route('/voices', methods=('GET', 'POST'))
 def voices():
-    voices_list = get_voices(speech_client)
-    print(voices_list)
-    db = get_db()
-    db.executemany('INSERT INTO voices(id, voice_name) VALUES(?, ?);', voices_list)
-    db.commit()
-    return redirect(url_for('blog.create'))
+    if request.method == 'POST':
+        voices_list = get_voices(speech_client)
+        db = get_db()
+        db.executemany('INSERT INTO voices(id, voice_name) VALUES(?, ?);', voices_list)
+        db.commit()
+        return redirect(url_for('blog.create'))
+    return redirect(url_for('blog.index'))
 
 @bp.route('/create', methods=('GET', 'POST'))
 def create():
@@ -152,3 +151,4 @@ def delete(id):
     db.execute('DELETE FROM post WHERE id = ?', (id,))
     db.commit()
     return redirect(url_for('blog.index'))
+

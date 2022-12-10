@@ -1,10 +1,31 @@
+import io
 import azure.cognitiveservices.speech as speechsdk
 import bs4
 import re
 import os
 import time
+import boto3
+import json
+from botocore.exceptions import ClientError
+
 
 from flask import current_app, url_for
+
+def get_keys(path):
+        with open(path) as f:
+            return json.load(f)
+def get_s3client():
+    keys = get_keys(".secret/.s3.json")
+    url = keys['url']
+    bucket = keys['bucket']
+    aws_access_key_id = keys['access_key_id']
+    aws_secret_access_key = keys['access_key_secret']
+    s3 = boto3.client('s3',
+      endpoint_url = url,
+      aws_access_key_id = aws_access_key_id,
+      aws_secret_access_key = aws_secret_access_key
+    )
+    return s3
 
 def pollytext(body, voice):
 
@@ -95,11 +116,9 @@ def synthesize_ssml(speech_client, body, voice):
 
 def create_mp3(id, slug, body, voice, speech_client):
     audio_content = synthesize_ssml(speech_client, body, voice)
-    mp3_name = str(id) + "_" + slug + ".mp3"
-    mp3_path = os.path.join(current_app.config['UPLOAD_FOLDER'],'audio', mp3_name)
-    with open(mp3_path, "wb") as out:
-    # Write the response to the output file.
-        out.write(audio_content)
-        print('Audio content written to file ' + mp3_name)
-    return mp3_name
+    file_name = str(id) + "_" + slug + ".mp3"
+    s3 = get_s3client()
+    bucket = 'ai-podcast'
+    s3.upload_fileobj(io.BytesIO(audio_content), bucket, file_name)
+    return file_name
 
