@@ -8,7 +8,6 @@ import boto3
 import json
 from botocore.exceptions import ClientError
 
-
 from flask import current_app, url_for
 
 def get_keys(path):
@@ -119,6 +118,8 @@ def create_mp3(id, slug, body, voice, speech_client):
     file_name = str(id) + "_" + slug + ".mp3"
     s3 = get_s3client()
     bucket = 'ai-podcast'
-    s3.upload_fileobj(io.BytesIO(audio_content), bucket, file_name)
-    return file_name
+    audiofile = io.BytesIO(audio_content)
+    audio_length = round(audiofile.getbuffer().nbytes / 1200)
+    s3.upload_fileobj(audiofile, bucket, file_name)
+    return (file_name, audio_length)
 

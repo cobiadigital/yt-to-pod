@@ -37,7 +37,7 @@
   
 <div>
  		<form method="post">
-			<input id="csrf_token" name="csrf_token" type="hidden" value="IjU3MTg2MTQ1M2QyMDg0M2NlZWU4MWUyZGVkY2EwYjQ2NjNhNjFjOTIi.Y5UZqQ._zWCFAdnonXlFBvlykci0aEZ-3c">
+			<input id="csrf_token" name="csrf_token" type="hidden" value="IjNmZTIxNTdiNzE2ZDRhMTU5YWNlMDdlOGQ1OGQ1M2FlOTUwMzExNjMi.Y5VCLg.tlY3lrJe4UVpKpD2n4elw9RF60U">
 			<label for="title">Title</label><br>
 			<input class="form-control" id="title" name="title" type="text" value=""><br>
 			<label for="slug">Slug</label><br>

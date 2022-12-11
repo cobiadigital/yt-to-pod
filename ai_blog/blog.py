@@ -37,7 +37,7 @@ class PostForm(FlaskForm):
 def rss():
     db = get_db()
     posts = db.execute(
-        'SELECT p.id, title, slug, body, voice, audio, created FROM post p ORDER BY created DESC'
+        'SELECT p.id, created, title, slug, body, voice, audio, length FROM post p ORDER BY created DESC'
     ).fetchall()
     fg = build_rss(posts)
     return Response(fg.rss_str(), mimetype='application/rss+xml')
@@ -89,11 +89,11 @@ def create():
             )
             db.commit()
             id = result.lastrowid
-            audio = create_mp3(id, slug, body, voice, speech_client)
+            audio_list = create_mp3(id, slug, body, voice, speech_client)
             db.execute(
-                'UPDATE post SET audio = ?'
+                'UPDATE post SET audio = ?, length = ?'
                 'WHERE id = ?',
-                (audio, id)
+                (audio_list[0],audio_list[1], id)
             )
             db.commit()
             return redirect(url_for('blog.index'))

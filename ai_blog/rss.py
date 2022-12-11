@@ -20,6 +20,9 @@ to go (i.e. http://<ipaddr>/index.xml).
 import os
 from feedgen.feed import FeedGenerator
 from flask import (request, url_for, current_app)
+from datetime import datetime
+from dateutil.parser import parse
+import pytz
 
 
 # Build an RSS feed and load the podcasst extension
@@ -28,6 +31,7 @@ def build_rss(posts):
     fg.load_extension('podcast')
     fg.link(href=url_for('blog.index'))
     fg.podcast.itunes_author('Ben Brenner')
+    fg.language('en-us')
     fg.podcast.itunes_category([
         {'cat': 'Health &amp; Fitness', 'sub': 'Mental Health'},
     ])
@@ -42,6 +46,9 @@ def build_rss(posts):
         fe.id(post['slug'])
         fe.title(post['title'])
         fe.description(post['body'])
-        fe.enclosure( 'https://audio.cobiadigital.com/' + post['audio'],  0, 'audio/mpeg')
+        created = post['created']
+        fe.enclosure( 'https://audio.cobiadigital.com/' + post['audio'], str(post['length']), 'audio/mpeg')
+        fe.pubdate(created.replace(tzinfo=pytz.UTC))
+
     return(fg)
 
