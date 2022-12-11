@@ -96,6 +96,10 @@ def create():
                 (audio_list[0],audio_list[1], id)
             )
             db.commit()
+            os.system("git status")
+            os.system("git add -A")
+            os.system('git commit -m "' + title + '"' )
+            os.system("git push")
             return redirect(url_for('blog.index'))
 
     return render_template('blog/create.html', form=form)
