@@ -31,7 +31,7 @@ def build_rss(posts):
     fg = FeedGenerator()
     fg.load_extension('podcast')
     fg.link(href=url_for('blog.index'))
-    fg.author( {'name':'Ben Brenner','email':'aiblog'} )
+    fg.author( {'name':'Ben Brenner','email':'aiblog@cobiadigital.com'} )
     fg.podcast.itunes_explicit(itunes_explicit=None)
 
     fg.podcast.itunes_author('Ben Brenner')

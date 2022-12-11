@@ -119,7 +119,7 @@ def create_mp3(id, slug, body, voice, speech_client):
     s3 = get_s3client()
     bucket = 'ai-podcast'
     audiofile = io.BytesIO(audio_content)
-    audio_length = round(audiofile.getbuffer().nbytes / 1200)
+    audio_length = round(audiofile.getbuffer().nbytes / 12000)
     s3.upload_fileobj(audiofile, bucket, file_name)
     return (file_name, audio_length)
 

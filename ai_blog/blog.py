@@ -33,7 +33,7 @@ class PostForm(FlaskForm):
     submit = SubmitField('Submit')
 
 
-@bp.route('/index.xml')
+@bp.route('/feed/')
 def rss():
     db = get_db()
     posts = db.execute(
