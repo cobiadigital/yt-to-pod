@@ -96,6 +96,7 @@ def create():
                 (audio_list[0],audio_list[1], id)
             )
             db.commit()
+            os.system("python freeze.py")
             os.system("git status")
             os.system("git add -A")
             os.system('git commit -m "' + title + '"' )
