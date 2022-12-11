@@ -25,11 +25,15 @@ from dateutil.parser import parse
 import pytz
 
 
+
 # Build an RSS feed and load the podcasst extension
 def build_rss(posts):
     fg = FeedGenerator()
     fg.load_extension('podcast')
     fg.link(href=url_for('blog.index'))
+    fg.author( {'name':'Ben Brenner','email':'aiblog'} )
+    fg.podcast.itunes_explicit(itunes_explicit=None)
+
     fg.podcast.itunes_author('Ben Brenner')
     fg.language('en-us')
     fg.podcast.itunes_category([
