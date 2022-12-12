@@ -25,10 +25,17 @@ bp = Blueprint('blog', __name__)
 
 speech_client = load_speech_client()
 
+
 class PostForm(FlaskForm):
     title = StringField('Title')
     slug = StringField('Slug')
+    cold_open = CKEditorField('Cold Open', validators=[DataRequired()] )
+    intro_music = SelectField('Intro Music',choices=[], validate_choice=True)
+    intro = CKEditorField('Intro', validators=[DataRequired()])
     body = CKEditorField('Body', validators=[DataRequired()])
+    mid_music = SelectField('Mid Music',choices=[], validate_choice=True)
+    ending = CKEditorField('Ending', validators=[DataRequired()])
+    end_music = SelectField('End Music',choices=[], validate_choice=True)
     voice = SelectField('Voice',choices=[], validate_choice=True)
     submit = SubmitField('Submit')
 
@@ -37,7 +44,7 @@ class PostForm(FlaskForm):
 def rss():
     db = get_db()
     posts = db.execute(
-        'SELECT p.id, created, title, slug, body, voice, audio, length FROM post p ORDER BY created DESC'
+        'SELECT p.id, created, title, slug, cold_open, intro, body, ending, voice, audio, length FROM post p ORDER BY created DESC'
     ).fetchall()
     fg = build_rss(posts)
     return Response(fg.rss_str(), mimetype='application/rss+xml')
@@ -46,7 +53,7 @@ def rss():
 def index():
     db = get_db()
     posts = db.execute(
-        'SELECT p.id, title, body, voice, created FROM post p ORDER BY created DESC'
+        'SELECT p.id, title, cold_open, intro, body, ending, voice, created FROM post p ORDER BY created DESC'
     ).fetchall()
     return render_template('blog/index.html', posts=posts)
 
@@ -64,12 +71,31 @@ def voices():
 def create():
     form = PostForm()
     db = get_db()
+    defaults = db.execute('SELECT * FROM defaults;').fetchone()
     voice_list = db.execute('SELECT * FROM voices;').fetchall()
+    music_list = db.execute('SELECT * FROM music;').fetchall()
+    form.title.data = defaults['title']
+    form.slug.data = defaults['slug']
+    form.cold_open.data = defaults['cold_open']
+    form.intro.data = defaults['intro']
+    form.body.data = defaults['body']
+    form.ending.data = defaults['ending']
     form.voice.choices = [(voice[0],voice[1]) for voice in voice_list]
+    form.voice.data = defaults['voice']
+    form.intro_music.choices = [track['intro_music'] for track in music_list]
+    form.mid_music.choices = [track['mid_music'] for track in music_list]
+    form.end_music.choices = [track['end_music'] for track in music_list]
+
     if request.method == 'POST':
         title = form.title.data
         slug = form.slug.data
+        cold_open = form.slug.data
+        intro_music = form.intro_music.data
+        intro = form.intro.data
+        mid_music = form.mid_music.data
         body = form.body.data
+        ending = form.ending.data
+        end_music = form.end_music.data
         voice = form.voice.data
         error = None
 
@@ -83,9 +109,9 @@ def create():
 
             db = get_db()
             result = db.execute(
-                'INSERT INTO post (title, slug, body)'
+                'INSERT INTO post (title, slug, cold_open, intro_music, intro, mid_music, body, ending, end_music )'
                 ' VALUES (?, ?, ?)',
-                (title, slug, body)
+                (title, slug, cold_open, intro, body, ending)
             )
             db.commit()
             id = result.lastrowid
@@ -96,11 +122,7 @@ def create():
                 (audio_list[0],audio_list[1], id)
             )
             db.commit()
-            os.system("python freeze.py")
-            os.system("git status")
-            os.system("git add -A")
-            os.system('git commit -m "' + title + '"' )
-            os.system("git push")
+
             return redirect(url_for('blog.index'))
 
     return render_template('blog/create.html', form=form)
@@ -118,13 +140,25 @@ def get_post(id):
 
     return post
 
+@bp.route('/<int:id>/', methods=('GET',))
+def post_page(id):
+    post = get_post(id)
+    audio_store_url = current_app.config.get_namespace('AUDIO_STORE_URL')
+
+    return render_template('blog/post_page.html', post=post, audio_store_url=audio_store_url)
+
+
 @bp.route('/<int:id>/update', methods=('GET', 'POST'))
 def update(id):
+    ckeditor = CKEditor()
     post = get_post(id)
     form = PostForm()
     form.title.data = post['title']
     form.slug.data = post['slug']
+    form.cold_open.data = post['cold_open']
+    form.cold_open.data = post['intro']
     form.body.data = post['body']
+    form.ending.data = post['ending']
 
     if request.method == 'POST':
         title = form.title.data
@@ -140,9 +174,9 @@ def update(id):
         else:
             db = get_db()
             db.execute(
-                'UPDATE post SET title = ?, slug = ?, body = ?'
+                'UPDATE post SET title = ?, slug = ?, cold_open = ?, intro = ?, body = ?, ending = ?'
                 'WHERE id = ?',
-                (title, slug, body, id)
+                (title, slug, cold_open, intro, body, ending, id)
             )
             db.commit()
             return redirect(url_for('blog.index'))

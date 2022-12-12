@@ -12,17 +12,36 @@
 			{{ form.title(class_="form-control")}}<br>
 			{{ form.slug.label }}<br>
 			{{ form.slug(class_="form-control")}}<br><br>
+			{{ form.cold_open.label }}<br>
+			{{ form.cold_open(class_="form-control") }}<br><br>
+			{{ form.intro_music.label }}<br>
+			{{ form.intro_music(class_="form-control")}}
+			<br><br>
+			{{ form.intro.label }}<br>
+			{{ form.intro(class_="form-control") }}
+			<br><br>
+			{{ form.mid_music.label }}<br>
+			{{ form.mid_music(class_="form-control")}}
+			<br><br>
 			{{ form.body.label }}<br>
 			{{ form.body(class_="form-control") }}
+			<br><br>
+			{{ form.ending.label }}<br>
+			{{ form.ending(class_="form-control") }}
+			<br><br>
+			{{ form.end_music.label }}<br>
+			{{ form.end_music(class_="form-control")}}
 			<br><br>
 			{{ form.voice.label }}<br>
 			{{ form.voice(class_="form-control")}}<br>
 		{{ form.submit }}
 		</form>
     </div>
-  <form method="post" action="{{ url_for('blog.voices') }}">
-    <input type="submit" value="Update Voices" name="updated_voices" value="1" >
-  </form>
+	<div class="mt-5">
+	  <form method="post" action="{{ url_for('blog.voices') }}">
+		<input type="submit" value="Update Voices" name="updated_voices" value="1" >
+	  </form>
+	</div>
 	{{ ckeditor.load() }}
 	{{ ckeditor.config(name='body') }}
 {% endblock %}
