@@ -138,9 +138,10 @@ def create_mp3(id, slug, cold_opening, intro_music, intro, body, mid_music, endi
     bucket = 'ai-podcast'
     audiofile = io.BytesIO(combined)
     audio_length = round(audiofile.getbuffer().nbytes / 12000)
-    #s3.upload_fileobj(audiofile, bucket, file_name)
-    with open(os.path.join(current_app.static_folder, 'combined.mp3'), "wb") as out:
-# Write the response to the output file.
-        out.write(combined)
+    s3.upload_fileobj(audiofile, bucket, file_name)
+    #debug code
+    #with open(os.path.join(current_app.static_folder, 'combined.mp3'), "wb") as out:
+    # Write the response to the output file.
+    #    out.write(combined)
     return (file_name, audio_length)
 
