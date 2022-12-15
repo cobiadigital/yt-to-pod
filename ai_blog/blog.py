@@ -70,21 +70,22 @@ def voices():
 @bp.route('/create', methods=('GET', 'POST'))
 def create():
     form = PostForm()
-    db = get_db()
-    defaults = db.execute('SELECT * FROM defaults;').fetchone()
-    voice_list = db.execute('SELECT * FROM voices;').fetchall()
-    music_list = db.execute('SELECT * FROM music;').fetchall()
-    form.title.data = defaults['title']
-    form.slug.data = defaults['slug']
-    form.cold_open.data = defaults['cold_open']
-    form.intro.data = defaults['intro']
-    form.body.data = defaults['body']
-    form.ending.data = defaults['ending']
-    form.voice.choices = [(voice[0],voice[1]) for voice in voice_list]
-    form.voice.data = defaults['voice']
-    form.intro_music.choices = [track['intro_music'] for track in music_list]
-    form.mid_music.choices = [track['mid_music'] for track in music_list]
-    form.end_music.choices = [track['end_music'] for track in music_list]
+    if request.method == 'GET':
+        db = get_db()
+        defaults = db.execute('SELECT * FROM defaults;').fetchone()
+        voice_list = db.execute('SELECT * FROM voices;').fetchall()
+        music_list = db.execute('SELECT * FROM music;').fetchall()
+        form.title.data = defaults['title']
+        form.slug.data = defaults['slug']
+        form.cold_open.data = defaults['cold_open']
+        form.intro.data = defaults['intro']
+        form.body.data = defaults['body']
+        form.ending.data = defaults['ending']
+        form.voice.choices = [(voice[0],voice[1]) for voice in voice_list]
+        form.voice.data = defaults['voice']
+        form.intro_music.choices = [track['intro_music'] for track in music_list]
+        form.mid_music.choices = [track['mid_music'] for track in music_list]
+        form.end_music.choices = [track['end_music'] for track in music_list]
 
     if request.method == 'POST':
         title = form.title.data
