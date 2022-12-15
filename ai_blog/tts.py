@@ -7,7 +7,6 @@ import time
 import boto3
 import json
 from botocore.exceptions import ClientError
-
 from flask import current_app, url_for
 
 def get_keys(path):
@@ -113,12 +112,28 @@ def synthesize_ssml(speech_client, body, voice):
             break
     return b"".join(audio_data_list)
 
-def create_mp3(id, slug, body, voice, speech_client):
-    audio_content = synthesize_ssml(speech_client, body, voice)
+def create_mp3(id, slug, cold_open, intro_music, intro, body, mid_music, ending, end_music, voice, speech_client):
+    build_audio = []
+    build_audio.append(synthesize_ssml(speech_client, cold_open, voice))
+    with open(os.path.join(current_app.instance_path, 'intro-music-1.mp3'), 'rb') as f:
+        intro_music = f.read()
+    build_audio.append(intro_music)
+    build_audio.append(synthesize_ssml(speech_client, intro, voice))
+    build_audio.append(synthesize_ssml(speech_client, body, voice))
+    with open(os.path.join(current_app.instance_path, 'mid-music-1.mp3'), 'rb') as f:
+        mid_music = f.read()
+    build_audio.append(mid_music)
+    build_audio.append(synthesize_ssml(speech_client, ending, voice))
+    with open(os.path.join(current_app.instance_path, 'end-music-1.mp3'), 'rb') as f:
+        end_music = f.read()
+    build_audio.append(intro_music)
+
+    combined = b"".join(build_audio)
+
     file_name = str(id) + "_" + slug + ".mp3"
     s3 = get_s3client()
     bucket = 'ai-podcast'
-    audiofile = io.BytesIO(audio_content)
+    audiofile = io.BytesIO(combined)
     audio_length = round(audiofile.getbuffer().nbytes / 12000)
     s3.upload_fileobj(audiofile, bucket, file_name)
     return (file_name, audio_length)

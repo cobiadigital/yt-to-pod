@@ -106,16 +106,15 @@ def create():
         if error is not None:
             flash(error)
         else:
-
             db = get_db()
             result = db.execute(
                 'INSERT INTO post (title, slug, cold_open, intro_music, intro, mid_music, body, ending, end_music )'
-                ' VALUES (?, ?, ?)',
-                (title, slug, cold_open, intro, body, ending)
+                ' VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                (title, slug, cold_open, intro_music, intro, mid_music, body, ending, end_music)
             )
             db.commit()
             id = result.lastrowid
-            audio_list = create_mp3(id, slug, body, voice, speech_client)
+            audio_list = create_mp3(id, slug, cold_open, intro_music, intro, body, mid_music, ending, end_music, voice, speech_client)
             db.execute(
                 'UPDATE post SET audio = ?, length = ?'
                 'WHERE id = ?',
