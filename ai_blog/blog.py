@@ -53,7 +53,7 @@ def rss():
 def index():
     db = get_db()
     posts = db.execute(
-        'SELECT p.id, title, cold_open, intro, body, ending, voice, created FROM post p ORDER BY created DESC'
+        'SELECT id, title, cold_open, intro, body, ending, voice, audio, created FROM post ORDER BY created DESC'
     ).fetchall()
     return render_template('blog/index.html', posts=posts)
 
@@ -89,7 +89,7 @@ def create():
     if request.method == 'POST':
         title = form.title.data
         slug = form.slug.data
-        cold_open = form.slug.data
+        cold_open = form.cold_open.data
         intro_music = form.intro_music.data
         intro = form.intro.data
         mid_music = form.mid_music.data
@@ -114,6 +114,10 @@ def create():
             )
             db.commit()
             id = result.lastrowid
+            print('text of intro')
+            print(intro)
+            print('END text of intro')
+
             audio_list = create_mp3(id, slug, cold_open, intro_music, intro, body, mid_music, ending, end_music, voice, speech_client)
             db.execute(
                 'UPDATE post SET audio = ?, length = ?'

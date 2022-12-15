@@ -83,7 +83,7 @@ def pollytext(body, voice):
                          <prosody rate="0%" pitch="0%">''' + textBlock + "</prosody></voice></speak>")
     textBlocks.append('''<speak xmlns="http://www.w3.org/2001/10/synthesis" xmlns:mstts="http://www.w3.org/2001/mstts" xmlns:emo="http://www.w3.org/2009/10/emotionml" version="1.0" xml:lang="en-US">
                      <voice name="''' + voice + '''">
-                         <prosody rate="0%" pitch="0%">''' + rest + '<break time="3s"/></prosody></voice></speak>')
+                         <prosody rate="0%" pitch="0%">''' + rest + '</prosody></voice></speak>')
     with open("instance/output.txt", "w") as text:
         # Write the response to the output file.
         text.write(str(textBlocks))
@@ -92,8 +92,8 @@ def pollytext(body, voice):
 # Get text from the console and synthesize to the default speaker.
 
 
-def synthesize_ssml(speech_client, body, voice):
-    textBlocks = pollytext(body, voice)
+def synthesize_ssml(speech_client, ssml, voice):
+    textBlocks = pollytext(ssml, voice)
     audio_data_list = []
     for textBlock in textBlocks:
         result = speech_client.speak_ssml_async(textBlock).get()
@@ -112,21 +112,24 @@ def synthesize_ssml(speech_client, body, voice):
             break
     return b"".join(audio_data_list)
 
-def create_mp3(id, slug, cold_open, intro_music, intro, body, mid_music, ending, end_music, voice, speech_client):
+def create_mp3(id, slug, cold_opening, intro_music, intro, body, mid_music, ending, end_music, voice, speech_client):
+    print('text of intro')
+    print(intro)
+    print('END text of intro')
     build_audio = []
-    build_audio.append(synthesize_ssml(speech_client, cold_open, voice))
-    with open(os.path.join(current_app.instance_path, 'intro-music-1.mp3'), 'rb') as f:
+    build_audio.append(synthesize_ssml(speech_client, cold_opening, voice))
+    with open(os.path.join(current_app.static_folder, 'intro-music-1.mp3'), 'rb') as f:
         intro_music = f.read()
     build_audio.append(intro_music)
     build_audio.append(synthesize_ssml(speech_client, intro, voice))
     build_audio.append(synthesize_ssml(speech_client, body, voice))
-    with open(os.path.join(current_app.instance_path, 'mid-music-1.mp3'), 'rb') as f:
+    with open(os.path.join(current_app.static_folder, 'mid-music-1.mp3'), 'rb') as f:
         mid_music = f.read()
     build_audio.append(mid_music)
     build_audio.append(synthesize_ssml(speech_client, ending, voice))
-    with open(os.path.join(current_app.instance_path, 'end-music-1.mp3'), 'rb') as f:
+    with open(os.path.join(current_app.static_folder, 'end-music-1.mp3'), 'rb') as f:
         end_music = f.read()
-    build_audio.append(intro_music)
+    build_audio.append(end_music)
 
     combined = b"".join(build_audio)
 
@@ -135,6 +138,9 @@ def create_mp3(id, slug, cold_open, intro_music, intro, body, mid_music, ending,
     bucket = 'ai-podcast'
     audiofile = io.BytesIO(combined)
     audio_length = round(audiofile.getbuffer().nbytes / 12000)
-    s3.upload_fileobj(audiofile, bucket, file_name)
+    #s3.upload_fileobj(audiofile, bucket, file_name)
+    with open(os.path.join(current_app.static_folder, 'combined.mp3'), "wb") as out:
+# Write the response to the output file.
+        out.write(combined)
     return (file_name, audio_length)
 
