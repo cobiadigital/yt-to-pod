@@ -18,41 +18,42 @@ Then connect your podcast app to your computer's IP/index.xml and you're good
 to go (i.e. http://<ipaddr>/index.xml).
 """
 import os
-from feedgen.feed import FeedGenerator
+from podgen import Podcast, Episode, Media, Person, Category, util
 from flask import (request, url_for, current_app)
-from datetime import datetime
+from datetime import datetime, timedelta
 from dateutil.parser import parse
 import pytz
 
 
 
-# Build an RSS feed and load the podcasst extension
+# Build an RSS feed and load the podcast extension
 def build_rss(posts):
-    fg = FeedGenerator()
-    fg.load_extension('podcast')
-    fg.link(href=url_for('blog.index'))
-    fg.author( {'name':'Ben Brenner','email':'aiblog@cobiadigital.com'} )
-    fg.podcast.itunes_explicit(itunes_explicit=None)
-
-    fg.podcast.itunes_author('Ben Brenner')
-    fg.language('en-us')
-    fg.podcast.itunes_category([
-        {'cat': 'Health &amp; Fitness', 'sub': 'Mental Health'},
-    ])
-    fg.podcast.itunes_complete('yes')
-    fg.podcast.itunes_image(url_for('static', filename='appreciative_narrative.png', _external=True))
-    fg.title('Appreciative Narrative Daily Thought')
-    fg.podcast.itunes_subtitle('Starting your day with a moment of appreciation')
-    fg.description("""Adapting Appreciative Inquiry and Narrative Therapy into a daily transformative practice""")
+    p = Podcast()
+    p.name = 'Appreciative Narrative Daily Moment'
+    p.description = """Adapting Appreciative Inquiry and
+                Narrative Therapy into a daily transformative
+                practice"""
+    p.website = url_for('blog.index', _external=True)
+    p.explicit = False
+    p.image = url_for('static', filename='appreciative_narrative.jpg', _external=True)
+    p.copyright = "2022 Cobia Digital"
+    p.language = "en-US"
+    p.authors = [Person("Ben Brenner", "aiblog@cobiadigital.com")]
+    p.feed_url = url_for('blog.rss', _external=True)
+    p.category = Category("Health &amp; Fitness", "Mental Health")
+    p.owner = p.authors[0]
 
     for post in posts:
-        fe = fg.add_entry()
-        fe.id(post['slug'])
-        fe.title(post['title'])
-        fe.description(post['body'])
-        created = post['created']
-        fe.enclosure( 'https://audio.cobiadigital.com/' + post['audio'], str(post['length']), 'audio/mpeg')
-        fe.pubdate(created.replace(tzinfo=pytz.UTC))
-
-    return(fg)
+        ep = p.add_episode(Episode())
+        ep.title = post['title']
+        ep.summary = util.htmlencode(post['cold_open'])
+        ep.long_summary = post['intro'] + post ['body'] + post['ending']
+        ep.media = Media('https://audio.cobiadigital.com/' + post['audio'],
+                        size = str(post['audio_size']),
+                        duration=timedelta(seconds=round(post['audio_size'] / 12000))
+                        )
+        ep.id= 'https://audio.cobiadigital.com/' + post['audio']
+        ep.link = url_for('blog.post_page',  id=post['id'])
+        ep.publication_date = parse(str(post['created'])).replace(tzinfo=pytz.UTC)
+    return(p)
 

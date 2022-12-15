@@ -14,6 +14,7 @@ def create_app(test_config=None):
     )
 
     app.config['AUDIO_STORE_BASE_URL'] = 'https://audio.cobiadigital.com'
+    app.config['BASE_URL'] = 'https://aiblog.cobiadigital.com'
 
     ckeditor = CKEditor()
     ckeditor.init_app(app)

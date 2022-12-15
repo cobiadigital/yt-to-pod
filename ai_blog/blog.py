@@ -40,11 +40,11 @@ class PostForm(FlaskForm):
     submit = SubmitField('Submit')
 
 
-@bp.route('/feed/index.xml')
+@bp.route('/rss.xml')
 def rss():
     db = get_db()
     posts = db.execute(
-        'SELECT p.id, created, title, slug, cold_open, intro, body, ending, voice, audio, length FROM post p ORDER BY created DESC'
+        'SELECT p.id, created, title, slug, cold_open, intro, body, ending, voice, audio, audio_size FROM post p ORDER BY created DESC'
     ).fetchall()
     fg = build_rss(posts)
     return Response(fg.rss_str(), mimetype='application/rss+xml')
@@ -121,7 +121,7 @@ def create():
 
             audio_list = create_mp3(id, slug, cold_open, intro_music, intro, body, mid_music, ending, end_music, voice, speech_client)
             db.execute(
-                'UPDATE post SET audio = ?, length = ?'
+                'UPDATE post SET audio = ?, audio_size = ?'
                 'WHERE id = ?',
                 (audio_list[0],audio_list[1], id)
             )
