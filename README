@@ -1,0 +1,28 @@
+This app built on flask turns multiple text fields into a blog and podcast by
+implementing Azure's Text to Speach SDK for life-like neural voices, combined
+with music, to create an audio file that is uploaded to a s3 bucket.
+
+I use PodGen to create an rss.xml then Flask Frozen to create a static version that
+is deployed on a git push to a Cloud Flare Page
+
+To get started you'll need add 3 files to a .secret directory in the root folder
+azure.json
+{
+  "subscription": "d4fxxxxxxxxxxxxxxxxxxxf",
+  "region": "northus"
+  }
+
+.s3.json
+{
+  "url": "https://<s3bucketurl>.r2.cloudflarestorage.com",
+  "bucket": "<name of bucket>",
+  "access_key_id": "<access id>>",
+  "access_key_secret": "<access secret>"
+  }
+
+spin up sqlite database in "instance"
+$flask db-init
+
+then run app
+$flask --app ai_blog --debug run
+
