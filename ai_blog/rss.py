@@ -47,13 +47,13 @@ def build_rss(posts):
         ep = p.add_episode(Episode())
         ep.title = post['title']
         ep.summary = util.htmlencode(post['cold_open'])
-        ep.long_summary = post['intro'] + post ['body'] + post['ending']
+        ep.long_summary = util.htmlencode(post['intro'] + post ['body'] + post['ending'])
         ep.media = Media('https://audio.cobiadigital.com/' + post['audio'],
                         size = str(post['audio_size']),
                         duration=timedelta(seconds=round(post['audio_size'] / 12000))
                         )
         ep.id= 'https://audio.cobiadigital.com/' + post['audio']
-        ep.link = url_for('blog.post_page',  id=post['id'])
+        ep.link = url_for('blog.post_page',  id=post['id'], _external=True)
         ep.publication_date = parse(str(post['created'])).replace(tzinfo=pytz.UTC)
     return(p)
 
