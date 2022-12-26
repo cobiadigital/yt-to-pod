@@ -115,9 +115,6 @@ def create():
             )
             db.commit()
             id = result.lastrowid
-            print('text of intro')
-            print(intro)
-            print('END text of intro')
 
             audio_list = create_mp3(id, slug, cold_open, intro_music, intro, body, mid_music, ending, end_music, voice, speech_client)
             db.execute(
@@ -126,6 +123,11 @@ def create():
                 (audio_list[0],audio_list[1], id)
             )
             db.commit()
+            os.system("python freeze.py")
+            os.system("git status")
+            os.system("git add -A")
+            os.system('git commit -m "' + title + '"' )
+            os.system("git push")
 
             return redirect(url_for('blog.index'))
 
