@@ -37,7 +37,7 @@
   
 <div>
  		<form method="post">
-			<input id="csrf_token" name="csrf_token" type="hidden" value="IjcwMjc5ZWMzMGFmZWM4NmMwZDYzYWUwZjg3MzA1MWM1ZWI1ZDQ5MjQi.Y6sN_w.bT7vxKLgY6M7zhqIfsjT9Aphzw8">
+			<input id="csrf_token" name="csrf_token" type="hidden" value="ImU3ZTMxNGZiNTczZjM3YjE3OGU4ZTY1ZGEyN2M3Yjg2OTliM2ZkMmUi.Y6xdbA.uvGnZw2GElIV1IMiRKIC3IytVfw">
 			<label for="title">Title</label><br>
 			<input class="form-control" id="title" name="title" type="text" value="Ep. 1 The Poetic Principle by Jacqueline Kelm - Appreciative Living"><br>
 			<label for="slug">Slug</label><br>
