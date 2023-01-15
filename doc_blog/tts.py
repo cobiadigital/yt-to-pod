@@ -112,27 +112,11 @@ def synthesize_ssml(speech_client, ssml, voice):
             break
     return b"".join(audio_data_list)
 
-def create_mp3(id, slug, cold_opening, intro_music, intro, body, mid_music, ending, end_music, voice, speech_client):
-    build_audio = []
-    build_audio.append(synthesize_ssml(speech_client, cold_opening, voice))
-    with open(os.path.join(current_app.static_folder, 'intro-music-1.mp3'), 'rb') as f:
-        intro_music = f.read()
-    build_audio.append(intro_music)
-    build_audio.append(synthesize_ssml(speech_client, intro, voice))
-    build_audio.append(synthesize_ssml(speech_client, body, voice))
-    with open(os.path.join(current_app.static_folder, 'mid-music-1.mp3'), 'rb') as f:
-        mid_music = f.read()
-    build_audio.append(mid_music)
-    build_audio.append(synthesize_ssml(speech_client, ending, voice))
-    with open(os.path.join(current_app.static_folder, 'end-music-1.mp3'), 'rb') as f:
-        end_music = f.read()
-    build_audio.append(end_music)
-
-    combined = b"".join(build_audio)
-
+def create_mp3(id, slug, response, voice, speech_client):
+    combined = synthesize_ssml(speech_client, response, voice)
     file_name = str(id) + "_" + slug + ".mp3"
     s3 = get_s3client()
-    bucket = 'ai-podcast'
+    bucket = 'docs-pod'
     audiofile = io.BytesIO(combined)
     audio_size = audiofile.getbuffer().nbytes
     s3.upload_fileobj(audiofile, bucket, file_name)

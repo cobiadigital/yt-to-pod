@@ -7,17 +7,17 @@ from werkzeug.exceptions import abort
 import os
 #Load 3rd Party
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, SelectField
+from wtforms import StringField, FileField, SubmitField, SelectField
 from wtforms.validators import DataRequired
 from flask_ckeditor import CKEditor, CKEditorField
 from feedgen.feed import FeedGenerator
 
 #Load app functions
-from ai_blog.db import get_db
-from ai_blog.tts import create_mp3
-from ai_blog.tts_voices import get_voices
-from ai_blog.load_azure_client import load_speech_client, get_keys
-from ai_blog.rss import build_rss
+from doc_blog.db import get_db
+from doc_blog.tts import create_mp3
+from doc_blog.tts_voices import get_voices
+from doc_blog.load_azure_client import load_speech_client, get_keys
+from doc_blog.rss import build_rss
 from flask_frozen import Freezer
 
 
@@ -25,17 +25,9 @@ bp = Blueprint('blog', __name__)
 
 speech_client = load_speech_client()
 
-
 class PostForm(FlaskForm):
-    title = StringField('Title')
-    slug = StringField('Slug')
-    cold_open = CKEditorField('Cold Open', validators=[DataRequired()] )
-    intro_music = SelectField('Intro Music',choices=[], validate_choice=True)
-    intro = CKEditorField('Intro', validators=[DataRequired()])
-    body = CKEditorField('Body', validators=[DataRequired()])
-    mid_music = SelectField('Mid Music',choices=[], validate_choice=True)
-    ending = CKEditorField('Ending', validators=[DataRequired()])
-    end_music = SelectField('End Music',choices=[], validate_choice=True)
+    slug = StringField()
+    file = FileField()
     voice = SelectField('Voice',choices=[], validate_choice=True)
     submit = SubmitField('Submit')
 
@@ -44,7 +36,7 @@ class PostForm(FlaskForm):
 def rss():
     db = get_db()
     posts = db.execute(
-        'SELECT p.id, created, title, slug, cold_open, intro, body, ending, voice, audio, audio_size FROM post p ORDER BY created DESC'
+        'SELECT p.id, slug, voice, audio, audio_size FROM post p ORDER BY created DESC'
     ).fetchall()
     fg = build_rss(posts)
     return Response(fg.rss_str(), mimetype='application/rss+xml')
@@ -53,7 +45,7 @@ def rss():
 def index():
     db = get_db()
     posts = db.execute(
-        'SELECT id, title, cold_open, intro, body, ending, voice, audio, created FROM post ORDER BY created DESC'
+        'SELECT p.id, slug, voice, audio, audio_size FROM post p ORDER BY created DESC'
     ).fetchall()
     return render_template('blog/index.html', posts=posts)
 
@@ -72,51 +64,32 @@ def create():
     form = PostForm()
     if request.method == 'GET':
         db = get_db()
-        defaults = db.execute('SELECT * FROM defaults;').fetchone()
         voice_list = db.execute('SELECT * FROM voices;').fetchall()
-        music_list = db.execute('SELECT * FROM music;').fetchall()
-        form.title.data = defaults['title']
-        form.slug.data = defaults['slug']
-        form.cold_open.data = defaults['cold_open']
-        form.intro.data = defaults['intro']
-        form.body.data = defaults['body']
-        form.ending.data = defaults['ending']
+
         form.voice.choices = [(voice[0],voice[1]) for voice in voice_list]
-        form.voice.data = defaults['voice']
-        form.intro_music.choices = [track['intro_music'] for track in music_list]
-        form.mid_music.choices = [track['mid_music'] for track in music_list]
-        form.end_music.choices = [track['end_music'] for track in music_list]
+#         form.voice.data = defaults['voice']
 
     if request.method == 'POST':
-        title = form.title.data
         slug = form.slug.data
-        cold_open = form.cold_open.data
-        intro_music = form.intro_music.data
-        intro = form.intro.data
-        mid_music = form.mid_music.data
-        body = form.body.data
-        ending = form.ending.data
-        end_music = form.end_music.data
+        response = form.file.data
         voice = form.voice.data
         error = None
 
         print(voice)
-        if not title:
-            error = 'Title is required.'
 
         if error is not None:
             flash(error)
         else:
             db = get_db()
             result = db.execute(
-                'INSERT INTO post (title, slug, cold_open, intro_music, intro, mid_music, body, ending, end_music )'
-                ' VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-                (title, slug, cold_open, intro_music, intro, mid_music, body, ending, end_music)
+                'INSERT INTO post (slug, response)'
+                ' VALUES (?, ?)',
+                (slug, response)
             )
             db.commit()
             id = result.lastrowid
 
-            audio_list = create_mp3(id, slug, cold_open, intro_music, intro, body, mid_music, ending, end_music, voice, speech_client)
+            audio_list = create_mp3(id, slug, response, voice, speech_client)
             db.execute(
                 'UPDATE post SET audio = ?, audio_size = ?'
                 'WHERE id = ?',
@@ -126,7 +99,7 @@ def create():
             os.system("python freeze.py")
             os.system("git status")
             os.system("git add -A")
-            os.system('git commit -m "' + title + '"' )
+            os.system('git commit -m "' + slug + '"' )
             os.system("git push")
 
             return redirect(url_for('blog.index'))

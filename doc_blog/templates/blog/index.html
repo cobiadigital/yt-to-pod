@@ -15,16 +15,13 @@
         <div>
           <h2>
               <a class="text-secondary" href="{{ url_for('blog.post_page', id=post['id']) }}">
-                {{ post['title'] }}
+                {{ post['slug'] }}
             </a>
           </h2>
           <div class="about">{{ post['created'].strftime('%Y-%m-%d') }}</div>
         </div>
       </header>
-      <p class="body text-start">{{ post['cold_open']|safe }}</p>
-      <p class="body text-start">{{ post['intro']|safe }}</p>
-      <p class="body text-start">{{ post['body']|safe }}</p>
-      <p class="body text-start">{{ post['ending']|safe }}</p>
+      <p class="body text-start">{{ post['response']|safe }}</p>
       <p><a href="instance/{{ post['audio']}}">{{ post['audio']}}</a></p>
 
       </div>

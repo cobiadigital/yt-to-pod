@@ -13,8 +13,8 @@ def create_app(test_config=None):
         DATABASE=os.path.join(app.instance_path, 'ai_blog.sqlite'),
     )
 
-    app.config['AUDIO_STORE_BASE_URL'] = 'https://audio.cobiadigital.com'
-    app.config['BASE_URL'] = 'https://aiblog.cobiadigital.com'
+    app.config['AUDIO_STORE_BASE_URL'] = 'https://docs-pod.cobiadigital.com'
+    app.config['BASE_URL'] = 'https://docspod.cobiadigital.com'
 
     ckeditor = CKEditor()
     ckeditor.init_app(app)
