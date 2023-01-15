@@ -11,6 +11,8 @@ from wtforms import StringField, FileField, SubmitField, SelectField
 from wtforms.validators import DataRequired
 from flask_ckeditor import CKEditor, CKEditorField
 from feedgen.feed import FeedGenerator
+from werkzeug.utils import secure_filename
+
 
 #Load app functions
 from doc_blog.db import get_db
@@ -36,7 +38,7 @@ class PostForm(FlaskForm):
 def rss():
     db = get_db()
     posts = db.execute(
-        'SELECT p.id, slug, voice, audio, audio_size FROM post p ORDER BY created DESC'
+        'SELECT p.id, slug, voice, response, audio, audio_size FROM post p ORDER BY created DESC'
     ).fetchall()
     fg = build_rss(posts)
     return Response(fg.rss_str(), mimetype='application/rss+xml')
@@ -62,6 +64,7 @@ def voices():
 @bp.route('/create', methods=('GET', 'POST'))
 def create():
     form = PostForm()
+
     if request.method == 'GET':
         db = get_db()
         voice_list = db.execute('SELECT * FROM voices;').fetchall()
@@ -71,7 +74,8 @@ def create():
 
     if request.method == 'POST':
         slug = form.slug.data
-        response = form.file.data
+        if form.file.data:
+            response = request.files[form.file.name].read()
         voice = form.voice.data
         error = None
 

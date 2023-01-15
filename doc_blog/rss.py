@@ -29,30 +29,28 @@ import pytz
 # Build an RSS feed and load the podcast extension
 def build_rss(posts):
     p = Podcast()
-    p.name = 'Appreciative Narrative Daily Moment'
-    p.description = """Adapting Appreciative Inquiry and
-                Narrative Therapy into a daily transformative
-                practice"""
+    p.name = "Doc to Pod"
+    p.description = """Documents to Podcast"""
     p.website = url_for('blog.index', _external=True)
     p.explicit = False
     p.image = url_for('static', filename='appreciative_narrative.jpg', _external=True)
-    p.copyright = "2022 Cobia Digital"
+    p.copyright = "2023 Cobia Digital"
     p.language = "en-US"
-    p.authors = [Person("Ben Brenner", "aiblog@cobiadigital.com")]
+    p.authors = [Person("Ben Brenner", "doctopod@cobiadigital.com")]
     p.feed_url = url_for('blog.rss', _external=True)
     p.category = Category("Health &amp; Fitness", "Mental Health")
     p.owner = p.authors[0]
 
     for post in posts:
         ep = p.add_episode(Episode())
-        ep.title = post['title']
-        ep.summary = util.htmlencode(post['cold_open'])
-        ep.long_summary = util.htmlencode(post['intro'] + post ['body'] + post['ending'])
-        ep.media = Media('https://audio.cobiadigital.com/' + post['audio'],
+        ep.title = post['slug']
+        ep.summary = util.htmlencode(post['response'])
+        ep.long_summary = util.htmlencode(post['response'])
+        ep.media = Media('https://docs-pod.cobiadigital.com/' + post['audio'],
                         size = str(post['audio_size']),
                         duration=timedelta(seconds=round(post['audio_size'] / 12000))
                         )
-        ep.id= 'https://audio.cobiadigital.com/' + post['audio']
+        ep.id= 'https://docs-pod.cobiadigital.com/' + post['audio']
         ep.link = url_for('blog.post_page',  id=post['id'], _external=True)
         ep.publication_date = parse(str(post['created'])).replace(tzinfo=pytz.UTC)
     return(p)

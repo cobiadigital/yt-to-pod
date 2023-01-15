@@ -6,7 +6,7 @@
 
 {% block content %}
 <div>
- 		<form method="post">
+ 		<form method="post" enctype="multipart/form-data">
 			{{ form.csrf_token }}
 			{{ form.slug.label }}<br>
 			{{ form.slug(class_="form-control")}}<br><br>
@@ -19,7 +19,7 @@
 		</form>
     </div>
 	<div class="mt-5">
-	  <form method="post" action="{{ url_for('blog.voices') }}">
+	  <form method="post" action="{{ url_for('blog.voices') }}" >
 		<input type="submit" value="Update Voices" name="updated_voices" value="1" >
 	  </form>
 	</div>
