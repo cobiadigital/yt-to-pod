@@ -38,7 +38,7 @@ class PostForm(FlaskForm):
 def rss():
     db = get_db()
     posts = db.execute(
-        'SELECT p.id, slug, voice, response, audio, audio_size FROM post p ORDER BY created DESC'
+        'SELECT p.id, slug, voice, response, audio, created, audio_size FROM post p ORDER BY created DESC'
     ).fetchall()
     fg = build_rss(posts)
     return Response(fg.rss_str(), mimetype='application/rss+xml')
@@ -47,7 +47,7 @@ def rss():
 def index():
     db = get_db()
     posts = db.execute(
-        'SELECT p.id, slug, voice, audio, audio_size FROM post p ORDER BY created DESC'
+        'SELECT p.id, slug, voice, response, audio, created, audio_size FROM post p ORDER BY created DESC'
     ).fetchall()
     return render_template('blog/index.html', posts=posts)
 

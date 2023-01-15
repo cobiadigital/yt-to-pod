@@ -36,7 +36,7 @@ def build_rss(posts):
     p.image = url_for('static', filename='appreciative_narrative.jpg', _external=True)
     p.copyright = "2023 Cobia Digital"
     p.language = "en-US"
-    p.authors = [Person("Ben Brenner", "doctopod@cobiadigital.com")]
+    p.authors = [Person("Ben Brenner", "docpod@cobiadigital.com")]
     p.feed_url = url_for('blog.rss', _external=True)
     p.category = Category("Health &amp; Fitness", "Mental Health")
     p.owner = p.authors[0]
@@ -44,8 +44,7 @@ def build_rss(posts):
     for post in posts:
         ep = p.add_episode(Episode())
         ep.title = post['slug']
-        ep.summary = util.htmlencode(post['response'])
-        ep.long_summary = util.htmlencode(post['response'])
+        ep.summary = "audio version of" + post['slug']
         ep.media = Media('https://docs-pod.cobiadigital.com/' + post['audio'],
                         size = str(post['audio_size']),
                         duration=timedelta(seconds=round(post['audio_size'] / 12000))

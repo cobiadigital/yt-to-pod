@@ -4,7 +4,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>New Post</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
-    <link rel="alternate" type="application/rss+xml" title="AI Blog" href="https://aiblog.cobiadigital.com/rss.xml" />
+    <link rel="alternate" type="application/rss+xml" title="AI Blog" href="https://docpod.cobiadigital.com/rss.xml" />
 
 </head>
 </body>
@@ -36,63 +36,20 @@
   
   
 <div>
- 		<form method="post">
-			<input id="csrf_token" name="csrf_token" type="hidden" value="ImNmYzg0NTE5NTRlNzc1YzMyMzcwYmE2YjE1ZjRlY2ZjNmNkMzBhNzQi.Y7bywQ.uFgl0PHkTndlYWdlSvUzrbipuok">
-			<label for="title">Title</label><br>
-			<input class="form-control" id="title" name="title" type="text" value="Ep. 1 The Poetic Principle by Jacqueline Kelm - Appreciative Living"><br>
+ 		<form method="post" enctype="multipart/form-data">
+			<input id="csrf_token" name="csrf_token" type="hidden" value="IjlkYjNlMmI1N2ZhNTFjODg5YzIxOTNkOTc5OTM3NGIyMzY5OTJmOTci.Y8SGCQ.SAuvXNlm4Q3ELMhOjm7iES5jIPg">
 			<label for="slug">Slug</label><br>
-			<input class="form-control" id="slug" name="slug" type="text" value="appreciative_narrative_ep1_poetic_principle_jacqueline_kelm_appreciative_living"><br><br>
-			<label for="cold_open">Cold Open</label><br>
-			<textarea class="ckeditor form-control" id="cold_open" name="cold_open" required>
-&lt;p&gt;You&#39;re listening to the Appreciative Narrative Daily Moment. Today&#39;s reading is from Chapter 2 of Appreciative Living by Jaqueline Kelm.&lt;/p&gt;</textarea><br><br>
-			<label for="intro_music">Intro Music</label><br>
-			<select class="form-control" id="intro_music" name="intro_music"><option value="intro-music-1.mp3">intro-music-1.mp3</option><option value="intro_music_2.mp3">intro_music_2.mp3</option></select>
-			<br><br>
-			<label for="intro">Intro</label><br>
-			<textarea class="ckeditor form-control" id="intro" name="intro" required>
-&lt;p&gt;One of the 5 primary principles of Appreciative Inquiry is the Poetic Principle. Kelm explains: For good or ill, we are subjective creatures. We shape our entire lives around what we think we see, but the fact is we see what we want to see. Our beliefs and thinking patterns direct our attention toward what we believe is important or enjoyable or interesting to pay attention to, and this process is not going to change anytime soon. The point is to be aware that we are all biased by nature, and that our perspective is just that: one perspective. We need to hold our beliefs and truths open to new information and further investigation.&lt;/p&gt;</textarea>
-			<br><br>
-			<label for="mid_music">Mid Music</label><br>
-			<select class="form-control" id="mid_music" name="mid_music"><option value="mid-music-1.mp3">mid-music-1.mp3</option><option value="mid_music_2.mp3">mid_music_2.mp3</option></select>
-			<br><br>
-			<label for="body">Body</label><br>
-			<textarea class="ckeditor form-control" id="body" name="body" required>
-&lt;p&gt;What&#39;s one thing you are grateful for?&lt;/p&gt;
-
-&lt;p&gt;It could be time you spent with a pet... something particular about your home...&amp;nbsp; a phone call with a family member...&lt;/p&gt;
-
-&lt;hr /&gt;
-&lt;p&gt;Think of a second thing you are grateful for.&lt;/p&gt;
-
-&lt;hr /&gt;
-&lt;p&gt;Now a third&lt;/p&gt;
-
-&lt;hr /&gt;
-&lt;p&gt;Now think about what role you played in these three things.&lt;/p&gt;
-
-&lt;hr /&gt;
-&lt;p&gt;What is something, no matter how small, you can do today that will bring you joy?&lt;/p&gt;
-
-&lt;p&gt;&amp;nbsp;&lt;/p&gt;
-</textarea>
-			<br><br>
-			<label for="ending">Ending</label><br>
-			<textarea class="ckeditor form-control" id="ending" name="ending" required>
-&lt;p&gt;One of Kelm&#39;s study participants said:&lt;/p&gt;
-
-&lt;p&gt;&#34;I learned that joy doesn&#39;t have to be big. Joy can be found in small, daily things. I found joy in floating in a lake with tiny dragonflies landing on my arms. I found joy in having something super-yummy planned for dinner, or cuddling with my three-year-old. How blessed I am!&#34;&lt;/p&gt;
-</textarea>
-			<br><br>
-			<label for="end_music">End Music</label><br>
-			<select class="form-control" id="end_music" name="end_music"><option value="end-music-1.mp3">end-music-1.mp3</option><option value="end_music_2.mp3">end_music_2.mp3</option></select>
+			<input class="form-control" id="slug" name="slug" type="text" value=""><br><br>
+			<label for="file">File</label><br>
+			<input class="form-control" id="file" name="file" type="file"><br><br>
 			<br><br>
 			<label for="voice">Voice</label><br>
-			<select class="form-control" id="voice" name="voice"><option value="en-AU-NatashaNeural">en-AU-NatashaNeural</option><option value="en-AU-WilliamNeural">en-AU-WilliamNeural</option><option value="en-AU-AnnetteNeural">en-AU-AnnetteNeural</option><option value="en-AU-CarlyNeural">en-AU-CarlyNeural</option><option value="en-AU-DarrenNeural">en-AU-DarrenNeural</option><option value="en-AU-DuncanNeural">en-AU-DuncanNeural</option><option value="en-AU-ElsieNeural">en-AU-ElsieNeural</option><option value="en-AU-FreyaNeural">en-AU-FreyaNeural</option><option value="en-AU-JoanneNeural">en-AU-JoanneNeural</option><option value="en-AU-KenNeural">en-AU-KenNeural</option><option value="en-AU-KimNeural">en-AU-KimNeural</option><option value="en-AU-NeilNeural">en-AU-NeilNeural</option><option value="en-AU-TimNeural">en-AU-TimNeural</option><option value="en-AU-TinaNeural">en-AU-TinaNeural</option><option value="en-GB-LibbyNeural">en-GB-LibbyNeural</option><option value="en-GB-AbbiNeural">en-GB-AbbiNeural</option><option value="en-GB-AlfieNeural">en-GB-AlfieNeural</option><option value="en-GB-BellaNeural">en-GB-BellaNeural</option><option value="en-GB-ElliotNeural">en-GB-ElliotNeural</option><option value="en-GB-EthanNeural">en-GB-EthanNeural</option><option value="en-GB-HollieNeural">en-GB-HollieNeural</option><option value="en-GB-MaisieNeural">en-GB-MaisieNeural</option><option value="en-GB-NoahNeural">en-GB-NoahNeural</option><option value="en-GB-OliverNeural">en-GB-OliverNeural</option><option value="en-GB-OliviaNeural">en-GB-OliviaNeural</option><option value="en-GB-ThomasNeural">en-GB-ThomasNeural</option><option value="en-GB-RyanNeural">en-GB-RyanNeural</option><option value="en-GB-SoniaNeural">en-GB-SoniaNeural</option><option value="en-GB-MiaNeural">en-GB-MiaNeural</option><option value="en-IE-ConnorNeural">en-IE-ConnorNeural</option><option value="en-IE-EmilyNeural">en-IE-EmilyNeural</option><option selected value="en-US-JennyNeural">en-US-JennyNeural</option><option value="en-US-JennyMultilingualNeural">en-US-JennyMultilingualNeural</option><option value="en-US-GuyNeural">en-US-GuyNeural</option><option value="en-US-AmberNeural">en-US-AmberNeural</option><option value="en-US-AnaNeural">en-US-AnaNeural</option><option value="en-US-AriaNeural">en-US-AriaNeural</option><option value="en-US-AshleyNeural">en-US-AshleyNeural</option><option value="en-US-BrandonNeural">en-US-BrandonNeural</option><option value="en-US-ChristopherNeural">en-US-ChristopherNeural</option><option value="en-US-CoraNeural">en-US-CoraNeural</option><option value="en-US-DavisNeural">en-US-DavisNeural</option><option value="en-US-ElizabethNeural">en-US-ElizabethNeural</option><option value="en-US-EricNeural">en-US-EricNeural</option><option value="en-US-JacobNeural">en-US-JacobNeural</option><option value="en-US-JaneNeural">en-US-JaneNeural</option><option value="en-US-JasonNeural">en-US-JasonNeural</option><option value="en-US-MichelleNeural">en-US-MichelleNeural</option><option value="en-US-MonicaNeural">en-US-MonicaNeural</option><option value="en-US-NancyNeural">en-US-NancyNeural</option><option value="en-US-SaraNeural">en-US-SaraNeural</option><option value="en-US-TonyNeural">en-US-TonyNeural</option><option value="en-US-AIGenerate1Neural">en-US-AIGenerate1Neural</option><option value="en-US-AIGenerate2Neural">en-US-AIGenerate2Neural</option><option value="en-US-RogerNeural">en-US-RogerNeural</option><option value="en-US-SteffanNeural">en-US-SteffanNeural</option></select><br>
+			<select class="form-control" id="voice" name="voice"><option value="en-AU-NatashaNeural">en-AU-NatashaNeural</option><option value="en-AU-WilliamNeural">en-AU-WilliamNeural</option><option value="en-AU-AnnetteNeural">en-AU-AnnetteNeural</option><option value="en-AU-CarlyNeural">en-AU-CarlyNeural</option><option value="en-AU-DarrenNeural">en-AU-DarrenNeural</option><option value="en-AU-DuncanNeural">en-AU-DuncanNeural</option><option value="en-AU-ElsieNeural">en-AU-ElsieNeural</option><option value="en-AU-FreyaNeural">en-AU-FreyaNeural</option><option value="en-AU-JoanneNeural">en-AU-JoanneNeural</option><option value="en-AU-KenNeural">en-AU-KenNeural</option><option value="en-AU-KimNeural">en-AU-KimNeural</option><option value="en-AU-NeilNeural">en-AU-NeilNeural</option><option value="en-AU-TimNeural">en-AU-TimNeural</option><option value="en-AU-TinaNeural">en-AU-TinaNeural</option><option value="en-GB-LibbyNeural">en-GB-LibbyNeural</option><option value="en-GB-AbbiNeural">en-GB-AbbiNeural</option><option value="en-GB-AlfieNeural">en-GB-AlfieNeural</option><option value="en-GB-BellaNeural">en-GB-BellaNeural</option><option value="en-GB-ElliotNeural">en-GB-ElliotNeural</option><option value="en-GB-EthanNeural">en-GB-EthanNeural</option><option value="en-GB-HollieNeural">en-GB-HollieNeural</option><option value="en-GB-MaisieNeural">en-GB-MaisieNeural</option><option value="en-GB-NoahNeural">en-GB-NoahNeural</option><option value="en-GB-OliverNeural">en-GB-OliverNeural</option><option value="en-GB-OliviaNeural">en-GB-OliviaNeural</option><option value="en-GB-ThomasNeural">en-GB-ThomasNeural</option><option value="en-GB-RyanNeural">en-GB-RyanNeural</option><option value="en-GB-SoniaNeural">en-GB-SoniaNeural</option><option value="en-GB-MiaNeural">en-GB-MiaNeural</option><option value="en-IE-ConnorNeural">en-IE-ConnorNeural</option><option value="en-IE-EmilyNeural">en-IE-EmilyNeural</option><option value="en-US-JennyNeural">en-US-JennyNeural</option><option value="en-US-JennyMultilingualNeural">en-US-JennyMultilingualNeural</option><option value="en-US-GuyNeural">en-US-GuyNeural</option><option value="en-US-AmberNeural">en-US-AmberNeural</option><option value="en-US-AnaNeural">en-US-AnaNeural</option><option value="en-US-AriaNeural">en-US-AriaNeural</option><option value="en-US-AshleyNeural">en-US-AshleyNeural</option><option value="en-US-BrandonNeural">en-US-BrandonNeural</option><option value="en-US-ChristopherNeural">en-US-ChristopherNeural</option><option value="en-US-CoraNeural">en-US-CoraNeural</option><option value="en-US-DavisNeural">en-US-DavisNeural</option><option value="en-US-ElizabethNeural">en-US-ElizabethNeural</option><option value="en-US-EricNeural">en-US-EricNeural</option><option value="en-US-JacobNeural">en-US-JacobNeural</option><option value="en-US-JaneNeural">en-US-JaneNeural</option><option value="en-US-JasonNeural">en-US-JasonNeural</option><option value="en-US-MichelleNeural">en-US-MichelleNeural</option><option value="en-US-MonicaNeural">en-US-MonicaNeural</option><option value="en-US-NancyNeural">en-US-NancyNeural</option><option value="en-US-SaraNeural">en-US-SaraNeural</option><option value="en-US-TonyNeural">en-US-TonyNeural</option><option value="en-US-AIGenerate1Neural">en-US-AIGenerate1Neural</option><option value="en-US-AIGenerate2Neural">en-US-AIGenerate2Neural</option><option value="en-US-RogerNeural">en-US-RogerNeural</option><option value="en-US-SteffanNeural">en-US-SteffanNeural</option></select><br>
 		<input id="submit" name="submit" type="submit" value="Submit">
 		</form>
     </div>
 	<div class="mt-5">
-	  <form method="post" action="/voices">
+	  <form method="post" action="/voices" >
 		<input type="submit" value="Update Voices" name="updated_voices" value="1" >
 	  </form>
 	</div>

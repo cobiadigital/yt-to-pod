@@ -1,9 +1,9 @@
 from flask_frozen import Freezer
-from ai_blog import create_app
+from doc_blog import create_app
 
 app = create_app()
 freezer = Freezer(app)
-app.config['FREEZER_BASE_URL'] = 'https://aiblog.cobiadigital.com'
+app.config['FREEZER_BASE_URL'] = 'https://docpod.cobiadigital.com'
 app.config['FREEZER_IGNORE_MIMETYPE_WARNINGS'] = True
 
 
