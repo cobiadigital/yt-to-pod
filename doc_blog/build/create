@@ -37,7 +37,7 @@
   
 <div>
  		<form method="post" enctype="multipart/form-data">
-			<input id="csrf_token" name="csrf_token" type="hidden" value="ImVkZTI0ZmY2YWM2M2I1M2JmNTcyMWMyZDg5ZTFlMThkMThhOWRkYjgi.Y8SI9A.nu9xrqN6sfZ8bIxe1m3e70sJsl8">
+			<input id="csrf_token" name="csrf_token" type="hidden" value="IjZlN2U1YjE2MzhjMmE4NmU2MDA1MTFkMDJjNWMwNmViMjcwYjM4YTEi.Y8Sbxw.jC4xkMSSB2pROtvVyFwnTUDGfL4">
 			<label for="slug">Slug</label><br>
 			<input class="form-control" id="slug" name="slug" type="text" value=""><br><br>
 			<label for="file">File</label><br>

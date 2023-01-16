@@ -74,6 +74,7 @@ def create():
 
     if request.method == 'POST':
         slug = form.slug.data
+        filename = form.file.name
         if form.file.data:
             response = request.files[form.file.name].read()
         voice = form.voice.data
@@ -86,14 +87,14 @@ def create():
         else:
             db = get_db()
             result = db.execute(
-                'INSERT INTO post (slug, response)'
-                ' VALUES (?, ?)',
-                (slug, response)
+                'INSERT INTO post (slug, filename, response)'
+                ' VALUES (?, ?, ?)',
+                (slug, filename, response)
             )
             db.commit()
             id = result.lastrowid
 
-            audio_list = create_mp3(id, slug, response, voice, speech_client)
+            audio_list = create_mp3(id, slug, filename, response, voice, speech_client)
             db.execute(
                 'UPDATE post SET audio = ?, audio_size = ?'
                 'WHERE id = ?',

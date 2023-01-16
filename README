@@ -23,6 +23,9 @@ azure.json
 spin up sqlite database in "instance"
 $flask db-init
 
+java -jar tika-server-1.24.jar
+
+
 then run app
-$flask --app ai_blog --debug run
+$flask --app doc_blog --debug run
 

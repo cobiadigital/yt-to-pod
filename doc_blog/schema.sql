@@ -12,6 +12,7 @@ CREATE TABLE "post"
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
     created     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     slug        TEXT not null,
+    filename    TEXT,
     response    TEXT,
     audio       TEXT,
     voice       TEXT,
