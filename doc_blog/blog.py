@@ -7,12 +7,14 @@ from werkzeug.exceptions import abort
 import os
 #Load 3rd Party
 from flask_wtf import FlaskForm
-from wtforms import StringField, FileField, SubmitField, SelectField
+from wtforms import StringField, FileField, SubmitField, SelectField, SelectMultipleField
 from wtforms.validators import DataRequired
 from flask_ckeditor import CKEditor, CKEditorField
 from feedgen.feed import FeedGenerator
 from werkzeug.utils import secure_filename
-
+import ebooklib
+#needs a running tika server using java -jar tika-server-1.24.jar
+from tika import parser
 
 #Load app functions
 from doc_blog.db import get_db
@@ -27,9 +29,16 @@ bp = Blueprint('blog', __name__)
 
 speech_client = load_speech_client()
 
-class PostForm(FlaskForm):
-    slug = StringField()
+class UploadForm(FlaskForm):
     file = FileField()
+    submit = SubmitField('Submit')
+
+class ChapterForm(FlaskForm):
+    chapters = SelectMultipleField('chapters',choices=[], validate_choice=True)
+    submit = SubmitField('Submit')
+
+class DetailsForm(FlaskForm):
+    slug = StringField()
     voice = SelectField('Voice',choices=[], validate_choice=True)
     submit = SubmitField('Submit')
 
@@ -64,6 +73,7 @@ def voices():
 @bp.route('/create', methods=('GET', 'POST'))
 def create():
     form = PostForm()
+    chapter_form = ChapterForm()
 
     if request.method == 'GET':
         db = get_db()
@@ -80,7 +90,13 @@ def create():
         voice = form.voice.data
         error = None
 
-        print(voice)
+        if file_ext == '.pdf':
+            pdf_parsed = parser.from_file(filename, xmlContent=True)
+            pdf_content = pdf_parsed["content"]
+        elif file_ext == '.epub':
+            chapters = epub_to_html(filename, sec_type)
+            chapter_form.chapters.choices = [(chapter,chapter) for chapter in chapters]
+            return render_template('blog/ebook.html', chapter_form=chapter_form)
 
         if error is not None:
             flash(error)

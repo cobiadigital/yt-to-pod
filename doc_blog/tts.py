@@ -1,6 +1,6 @@
 import io
 import azure.cognitiveservices.speech as speechsdk
-from tika import parser
+
 import bs4
 import re
 import os
@@ -26,12 +26,25 @@ def get_s3client():
     )
     return s3
 
-def pollytext(body, file_ext, voice):
-    if file_ext == 'pdf':
-        pdf_parsed = parser.from_file(filename, xmlContent=True)
-        pdf_content = pdf_parsed["content"]
+def pollytext(body, voice):
     soup = bs4.BeautifulSoup(body, "html.parser")
+
     hr_tags = soup("hr")
+    for epub_h1_tag in soup.find_all("p", class_=re.compile(r"H\d")):
+        epub_h1_tag.attrs = {}
+        epub_h1_tag.insert_after(hr_tag)
+
+    # remove footnote numbers
+    for sup_tag in soup.find_all("sup"):
+        sup_tag.decompose()
+
+    #Adding pause after headings and lists
+    for header_tags in soup.find_all(["h1", "h2", "h3", "h4", "li"]):
+        hr_tag = soup.new_tag('hr')
+        header_tags.name = "p"
+        header_tags.insert_before(hr_tag)
+        header_tags.insert_after(hr_tag)
+
     for hr_tag in hr_tags:
         hr_tag.name = "break"
 
@@ -95,8 +108,8 @@ def pollytext(body, file_ext, voice):
 # Get text from the console and synthesize to the default speaker.
 
 
-def synthesize_ssml(speech_client, file_ext, ssml, voice):
-    textBlocks = pollytext(ssml, file_ext, voice)
+def synthesize_ssml(speech_client, ssml, voice):
+    textBlocks = pollytext(ssml, voice)
     audio_data_list = []
     for textBlock in textBlocks:
         result = speech_client.speak_ssml_async(textBlock).get()
@@ -119,6 +132,8 @@ def create_mp3(id, slug, filename, response, voice, speech_client):
     split_tup = os.path.splitext(filename)
     file_name = split_tup[0]
     file_ext = split_tup[1]
+
+
     combined = synthesize_ssml(speech_client, file_ext, response, voice)
     file_name = str(id) + "_" + slug + ".mp3"
     s3 = get_s3client()
