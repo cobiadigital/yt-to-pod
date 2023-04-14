@@ -67,7 +67,7 @@ class more_details(FlaskForm):
 def rss():
     db = get_db()
     posts = db.execute(
-        'SELECT p.id, slug, voice, body, audio, created, audio_size FROM post p ORDER BY created DESC'
+        'SELECT p.id, slug, title, voice, body, audio, created, audio_size FROM post p ORDER BY created DESC'
     ).fetchall()
     fg = build_rss(posts)
     return Response(fg.rss_str(), mimetype='application/rss+xml')
@@ -192,8 +192,8 @@ def selected_chapters():
     items = list(book.get_items_of_type(ebooklib.ITEM_DOCUMENT))
     for segment in segments:
         ch_content = items[int(segment)].content
-        mp3_name = str(f'{slug}-{segment}.mp3')
-        title = str(f'{booktitle} - {segment}')
+        mp3_name = str(f'{slug}-{str(segment)}.mp3')
+        title = str(f'{booktitle} - {str(segment)}')
         audio_list = create_mp3(speech_client, ch_content, voice, mp3_name)
         print(audio_list)
         db = get_db()

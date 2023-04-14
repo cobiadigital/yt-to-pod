@@ -38,13 +38,13 @@ def build_rss(posts):
     p.language = "en-US"
     p.authors = [Person("Ben Brenner", "docpod@cobiadigital.com")]
     p.feed_url = url_for('blog.rss', _external=True)
-    p.category = Category("Health &amp; Fitness", "Mental Health")
+    p.category = Category("Arts", "Books")
     p.owner = p.authors[0]
 
     for post in posts:
         ep = p.add_episode(Episode())
-        ep.title = post['slug']
-        ep.summary = "audio version of" + post['slug']
+        ep.title = post['title']
+        ep.summary = "audio version of " + post['title']
         ep.media = Media('https://docs-pod.cobiadigital.com/' + post['audio'],
                         size = str(post['audio_size']),
                         duration=timedelta(seconds=round(post['audio_size'] / 12000))

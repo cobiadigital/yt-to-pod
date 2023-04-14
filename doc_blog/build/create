@@ -40,7 +40,7 @@
 		  				hx-trigger="submit"
 		  				enctype="multipart/form-data"
 						hx-swap="outerHTML">
-			<input id="csrf_token" name="csrf_token" type="hidden" value="ImM0MmQxMDgzNGZiMjJkNjMxZTg0ZTc4NDNhOGM1NzIyODM2ZjgyOTIi.ZDmzmA._XSPKyQsEoTm72ed2Bn-hUG9O4E">
+			<input id="csrf_token" name="csrf_token" type="hidden" value="IjgzOTkzMmQwZTQ3ZWEwY2Q3OWI5NDRiNmI0MjM2NjkyZDZjZTU1YWEi.ZDm4zg.12XdBe6MmrhpNBgocynNDZlXOlg">
 			<label for="file">File</label><br>
 			<input class="form-control" id="file" name="file" type="file"><br><br>
 			<input id="submit" name="submit" type="submit" value="Submit">
