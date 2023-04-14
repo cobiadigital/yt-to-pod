@@ -1,26 +1,30 @@
 {% extends 'base.html' %}
 
 {% block header %}
-  <h1>{% block title %}New Post{% endblock %}</h1>
+  <h1>{% block title %}New File{% endblock %}</h1>
 {% endblock %}
 
 {% block content %}
 <div>
- 		<form method="post" enctype="multipart/form-data">
-			{{ form.csrf_token }}
-			{{ form.file.label }}<br>
-			{{ form.file(class_="form-control") }}<br><br>
-			<br><br>
-			{{ form.voice.label }}<br>
-			{{ form.voice(class_="form-control")}}<br>
-		{{ form.submit }}
-		</form>
+	<form hx-post={{url_for('blog.upload_file')}} hx-target="#chapters"
+		  				hx-trigger="submit"
+		  				enctype="multipart/form-data"
+						hx-swap="outerHTML">
+			{{ upload_form.csrf_token }}
+			{{ upload_form.file.label }}<br>
+			{{ upload_form.file(class_="form-control") }}<br><br>
+			{{ upload_form.submit }}
+	</form>
+
+			<div id="chapters">
+
+			</div>
     </div>
-	<div class="mt-5">
-	  <form method="post" action="{{ url_for('blog.voices') }}" >
-		<input type="submit" value="Update Voices" name="updated_voices" value="1" >
-	  </form>
-	</div>
+<!--	<div class="mt-5">-->
+<!--	  <form method="post" action="{{ url_for('blog.voices') }}" >-->
+<!--		<input type="submit" value="reload voices" name="updated_voices" value="1" >-->
+<!--	  </form>-->
+<!--	</div>-->
 	{{ ckeditor.load() }}
 	{{ ckeditor.config(name='body') }}
 {% endblock %}

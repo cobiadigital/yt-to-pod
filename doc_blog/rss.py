@@ -33,7 +33,7 @@ def build_rss(posts):
     p.description = """Documents to Podcast"""
     p.website = url_for('blog.index', _external=True)
     p.explicit = False
-    p.image = url_for('static', filename='appreciative_narrative.jpg', _external=True)
+    p.image = url_for('static', filename='docs-to-pod.png', _external=True)
     p.copyright = "2023 Cobia Digital"
     p.language = "en-US"
     p.authors = [Person("Ben Brenner", "docpod@cobiadigital.com")]

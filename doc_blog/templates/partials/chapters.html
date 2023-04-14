@@ -1,0 +1,14 @@
+<div id="chapters">
+  	<form action="{{ url_for('blog.selected_chapters') }}" method="post">
+        {{chapter_form.csrf_token }}
+        {{chapter_form.chapters}}<br><br>
+        {{ chapter_form.title.label }}<br>
+        {{ chapter_form.title(class_="form-control")}}<br><br>
+        {{ chapter_form.slug.label }}<br>
+        {{ chapter_form.slug(class_="form-control")}}<br><br>
+        {{ chapter_form.voice.label }}<br>
+        {{ chapter_form.voice(class_="form-control")}}<br>
+        {{chapter_form.submit}} <br><br>
+
+  </form>
+</div>

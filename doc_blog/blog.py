@@ -5,25 +5,32 @@ from flask import (
 )
 from werkzeug.exceptions import abort
 import os
+from doc_blog.tts import create_mp3
+
 #Load 3rd Party
 from flask_wtf import FlaskForm
-from wtforms import StringField, FileField, SubmitField, SelectField, SelectMultipleField
+from wtforms import StringField, SubmitField, SelectField, SelectMultipleField
+from flask_wtf.file import FileField, FileRequired
 from wtforms.validators import DataRequired
 from flask_ckeditor import CKEditor, CKEditorField
 from feedgen.feed import FeedGenerator
 from werkzeug.utils import secure_filename
 import ebooklib
+from ebooklib import epub
+import shelve
+
 #needs a running tika server using java -jar tika-server-1.24.jar
 from tika import parser
 
 #Load app functions
 from doc_blog.db import get_db
-from doc_blog.tts import create_mp3
+from doc_blog.tts import create_mp3, synthesize_ssml
 from doc_blog.tts_voices import get_voices
 from doc_blog.load_azure_client import load_speech_client, get_keys
 from doc_blog.rss import build_rss
 from flask_frozen import Freezer
 
+# from doc_blog
 
 bp = Blueprint('blog', __name__)
 
@@ -35,6 +42,9 @@ class UploadForm(FlaskForm):
 
 class ChapterForm(FlaskForm):
     chapters = SelectMultipleField('chapters',choices=[], validate_choice=True)
+    title = StringField()
+    slug = StringField()
+    voice = SelectField('Voice',choices=[], validate_choice=True)
     submit = SubmitField('Submit')
 
 class DetailsForm(FlaskForm):
@@ -43,11 +53,21 @@ class DetailsForm(FlaskForm):
     submit = SubmitField('Submit')
 
 
+class upload_file(FlaskForm):
+    file = FileField(validators=[FileRequired()])
+
+class more_details(FlaskForm):
+    slug = StringField()
+    voice = SelectField('Voice',choices=[], validate_choice=True)
+    submit = SubmitField('Submit')
+
+
+
 @bp.route('/rss.xml')
 def rss():
     db = get_db()
     posts = db.execute(
-        'SELECT p.id, slug, voice, response, audio, created, audio_size FROM post p ORDER BY created DESC'
+        'SELECT p.id, slug, voice, body, audio, created, audio_size FROM post p ORDER BY created DESC'
     ).fetchall()
     fg = build_rss(posts)
     return Response(fg.rss_str(), mimetype='application/rss+xml')
@@ -56,7 +76,7 @@ def rss():
 def index():
     db = get_db()
     posts = db.execute(
-        'SELECT p.id, slug, voice, response, audio, created, audio_size FROM post p ORDER BY created DESC'
+        'SELECT p.id, slug, voice, body, audio, created, audio_size FROM post p ORDER BY created DESC'
     ).fetchall()
     return render_template('blog/index.html', posts=posts)
 
@@ -72,60 +92,126 @@ def voices():
 
 @bp.route('/create', methods=('GET', 'POST'))
 def create():
-    form = PostForm()
-    chapter_form = ChapterForm()
-
-    if request.method == 'GET':
-        db = get_db()
-        voice_list = db.execute('SELECT * FROM voices;').fetchall()
-
-        form.voice.choices = [(voice[0],voice[1]) for voice in voice_list]
-#         form.voice.data = defaults['voice']
-
+    upload_form = UploadForm()
     if request.method == 'POST':
-        slug = form.slug.data
-        filename = form.file.name
+        sh = shelve.open("file")
+        sh.close()
+        print(form.file.data.filename)
         if form.file.data:
-            response = request.files[form.file.name].read()
+            sh['filename'] = form.file.data.filename
+            f = form.file.data
+            f.save(os.path.join(
+                current_app.instance_path, 'files', sh['filename']
+                ))
+#             file_data = form.file.data.read()
         voice = form.voice.data
         error = None
+        split_tup = os.path.splitext(filename)
+        file_name = split_tup[0]
+        file_ext = split_tup[1]
 
         if file_ext == '.pdf':
-            pdf_parsed = parser.from_file(filename, xmlContent=True)
+            pdf_parsed = parser.from_file(file_data, xmlContent=True)
             pdf_content = pdf_parsed["content"]
         elif file_ext == '.epub':
-            chapters = epub_to_html(filename, sec_type)
-            chapter_form.chapters.choices = [(chapter,chapter) for chapter in chapters]
+            book = epub.read_epub(os.path.join(
+                current_app.instance_path, 'files', sh['filename']
+                ))
+            items = list(book.get_items_of_type(ebooklib.ITEM_DOCUMENT))
+            n = 0
+            chapters_list =[]
+            for item in items:
+                chapters_list.append((n, item.get_name()))
+                n += 1
+            chapter_form = ChapterForm()
+            chapter_form.chapters.choices = chapters_list
             return render_template('blog/ebook.html', chapter_form=chapter_form)
-
-        if error is not None:
-            flash(error)
         else:
+            print('neither pdf or epub')
+
+
+    return render_template('blog/create.html', upload_form=upload_form)
+
+@bp.route('/upload_file', methods=('GET','POST'))
+def upload_file():
+    if request.method == 'GET':
+         return redirect(url_for('blog.index'))
+    if request.method == 'POST':
+        upload_form = UploadForm()
+        sh = shelve.open("file")
+        if upload_form.file.data:
+            filename = upload_form.file.data.filename
+            sh['filename'] = filename
+            f = upload_form.file.data
+            f.save(os.path.join(
+                current_app.instance_path, 'files', filename
+                ))
+    #             file_data = form.file.data.read()
+        error = None
+        split_tup = os.path.splitext(sh['filename'])
+        file_name = split_tup[0]
+        file_ext = split_tup[1]
+
+        if file_ext == '.pdf':
+            pdf_parsed = parser.from_file(file_data, xmlContent=True)
+            pdf_content = pdf_parsed["content"]
+        elif file_ext == '.epub':
+            book = epub.read_epub(os.path.join(
+                current_app.instance_path, 'files', filename
+                ))
+            items = list(book.get_items_of_type(ebooklib.ITEM_DOCUMENT))
+            n = 0
+            chapters_list =[]
+            for item in items:
+                chapters_list.append((n, str(f'{item.get_name()} - {len(item.get_content())}')))
+                n += 1
+            chapter_form = ChapterForm()
+            chapter_form.title.data = book.title
+            chapter_form.chapters.choices = chapters_list
+            chapter_form.slug.data = book.title.replace(",","").replace(" ","_")
             db = get_db()
-            result = db.execute(
-                'INSERT INTO post (slug, filename, response)'
-                ' VALUES (?, ?, ?)',
-                (slug, filename, response)
-            )
-            db.commit()
-            id = result.lastrowid
+            voice_list = db.execute('SELECT * FROM voices;').fetchall()
+            chapter_form.voice.choices = [(voice[0],voice[1]) for voice in voice_list]
+    #         form.voice.data = defaults['voice']
 
-            audio_list = create_mp3(id, slug, filename, response, voice, speech_client)
-            db.execute(
-                'UPDATE post SET audio = ?, audio_size = ?'
-                'WHERE id = ?',
-                (audio_list[0],audio_list[1], id)
-            )
-            db.commit()
-            os.system("python freeze.py")
-            os.system("git status")
-            os.system("git add -A")
-            os.system('git commit -m "' + slug + '"' )
-            os.system("git push")
+            return render_template('partials/chapters.html', chapter_form=chapter_form)
 
-            return redirect(url_for('blog.index'))
+@bp.route('/selected_chapters', methods=('POST',))
+def selected_chapters():
+    sh = shelve.open("file")
+    filename = sh['filename']
+    chapter_form = ChapterForm()
+    segments = chapter_form.chapters.data
+    booktitle = chapter_form.title.data
+    slug = chapter_form.slug.data
+    voice = chapter_form.voice.data
+    print(segments)
+    book = epub.read_epub(os.path.join(
+        current_app.instance_path, 'files', filename
+        ))
+    items = list(book.get_items_of_type(ebooklib.ITEM_DOCUMENT))
+    for segment in segments:
+        ch_content = items[int(segment)].content
+        mp3_name = str(f'{slug}-{segment}.mp3')
+        title = str(f'{booktitle} - {segment}')
+        audio_list = create_mp3(speech_client, ch_content, voice, mp3_name)
+        print(audio_list)
+        db = get_db()
+        result = db.execute(
+            'INSERT INTO post (title, slug, body, audio, voice, audio_size )'
+            ' VALUES (?, ?, ?, ?, ?, ?)',
+            (title, slug, ch_content, audio_list[0], voice, audio_list[1])
+        )
+        db.commit()
+        os.system("python freeze.py")
+        os.system("git status")
+        os.system("git add -A")
+        os.system('git commit -m "' + title + '"' )
+        os.system("git push")
 
-    return render_template('blog/create.html', form=form)
+    return redirect(url_for('blog.index'))
+
+
 
 
 def get_post(id):
@@ -155,8 +241,6 @@ def update(id):
     form = PostForm()
     form.title.data = post['title']
     form.slug.data = post['slug']
-    form.cold_open.data = post['cold_open']
-    form.cold_open.data = post['intro']
     form.body.data = post['body']
     form.ending.data = post['ending']
 
