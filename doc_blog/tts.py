@@ -38,6 +38,9 @@ def pollytext(body, voice):
     for sup_tag in soup.find_all("sup"):
         sup_tag.decompose()
 
+    for sup_tag in soup.find_all('span', attrs={'class':"superscript"}):
+        sup_tag.decompose()
+
     #Adding pause after headings and lists
     for header_tags in soup.find_all(["h1", "h2", "h3", "h4", "li"]):
         hr_tag = soup.new_tag('hr')
@@ -47,6 +50,16 @@ def pollytext(body, voice):
 
     for hr_tag in hr_tags:
         hr_tag.name = "break"
+
+    for epub_i_tag in soup.find_all('span', attrs={'class':"ePub-I"}):
+        epub_i_tag.attrs = {}
+        epub_i_tag.name = "emphasis"
+        epub_i_tag['level'] = "moderate"
+
+    for epub_i_tag in soup.find_all('span', attrs={'class':"italic"}):
+        epub_i_tag.attrs = {}
+        epub_i_tag.name = "emphasis"
+        epub_i_tag['level'] = "moderate"
 
     emphasis = soup(["em","i"])
     for emph in emphasis:
