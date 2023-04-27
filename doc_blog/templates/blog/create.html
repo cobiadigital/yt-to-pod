@@ -6,17 +6,23 @@
 
 {% block content %}
 <div>
-	<form hx-post={{url_for('blog.upload_file')}} hx-target="#chapters"
+	<form hx-post={{url_for('blog.keyword_search')}} hx-target="#stories"
 		  				hx-trigger="submit"
-		  				enctype="multipart/form-data"
 						hx-swap="outerHTML">
-			{{ upload_form.csrf_token }}
-			{{ upload_form.file.label }}<br>
-			{{ upload_form.file(class_="form-control") }}<br><br>
-			{{ upload_form.submit }}
+			{{ search_form.csrf_token }}
+			{{ search_form.kudos_start.label }}<br>
+			{{ search_form.kudos_start(class="form-control") }} - {{ search_form.kudos_end(class="form-control") }}<br>
+			{{ search_form.fandoms.label }}
+			{{ search_form.fandoms(class="form-control" }}
+			{{ search_form.word_count_start.label }}<br/>
+			{{ search_form.word_count_start(class="form-control") }} - {{ search_form.word_count_end(class="form-control") }}<br/>
+ 			{{ search_form.rating.label }}
+			{{ search_form.rating(class="form-control") }}<br>
+			{{ search_form.submit(class="btn btn-primary") }}<br><br>
+
 	</form>
 
-			<div id="chapters">
+			<div id="stories">
 
 			</div>
     </div>
@@ -25,6 +31,5 @@
 <!--		<input type="submit" value="reload voices" name="updated_voices" value="1" >-->
 <!--	  </form>-->
 <!--	</div>-->
-	{{ ckeditor.load() }}
-	{{ ckeditor.config(name='body') }}
+
 {% endblock %}

@@ -3,32 +3,28 @@ from flask import (
     Blueprint, flash, g, redirect, Response, render_template, request, url_for, send_from_directory,
     current_app, send_file
 )
+from datetime import datetime
 from werkzeug.exceptions import abort
 import os
+import AO3
 from doc_blog.tts import create_mp3
 
 #Load 3rd Party
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, SelectField, SelectMultipleField
-from flask_wtf.file import FileField, FileRequired
+from wtforms import StringField, SubmitField, SelectField, SelectMultipleField, IntegerField
 from wtforms.validators import DataRequired
-from flask_ckeditor import CKEditor, CKEditorField
 from feedgen.feed import FeedGenerator
 from werkzeug.utils import secure_filename
-import ebooklib
-from ebooklib import epub
+
 import shelve
 
-#needs a running tika server using java -jar tika-server-1.24.jar
-from tika import parser
-
 #Load app functions
-from doc_blog.db import get_db
-from doc_blog.tts import create_mp3, synthesize_ssml
-from doc_blog.tts_voices import get_voices
-from doc_blog.load_azure_client import load_speech_client, get_keys
-from doc_blog.rss import build_rss
-from flask_frozen import Freezer
+from . import db
+from .tts import create_mp3, synthesize_ssml
+from .tts_voices import get_voices
+from .load_azure_client import load_speech_client, get_keys
+from .rss import build_rss
+# from flask_frozen import Freezer
 
 # from doc_blog
 
@@ -36,10 +32,23 @@ bp = Blueprint('blog', __name__)
 
 speech_client = load_speech_client()
 
-class UploadForm(FlaskForm):
-    file = FileField()
+class SearchForm(FlaskForm):
+    kudos_start = IntegerField('Kudos', validators=[DataRequired()])
+    kudos_end = IntegerField('Kudos End', validators=[DataRequired()])
+    fandoms = StringField('Fandoms', validators=[DataRequired()])
+    word_count_start = IntegerField('Word Count', validators=[DataRequired()])
+    word_count_end = IntegerField('Word Count End', validators=[DataRequired()])
+    any_field = StringField('Any Field', validators=[DataRequired()])
+    tags = StringField('Tags', validators=[DataRequired()])
+    rating = SelectMultipleField('Rating',choices=[('General Audiences', 'General Audiences'),
+                                                   ('Teen And Up Audiences', 'Teen And Up Audiences'),
+                                                   ('Mature', 'Mature'),
+                                                   ('Explicit', 'Explicit')], validate_choice=True)
     submit = SubmitField('Submit')
 
+class ChooseStory(FlaskForm):
+    story = SelectField('Story',choices=[], validate_choice=True)
+    submit = SubmitField('Submit')
 class ChapterForm(FlaskForm):
     chapters = SelectMultipleField('chapters',choices=[], validate_choice=True)
     title = StringField()
@@ -53,32 +62,42 @@ class DetailsForm(FlaskForm):
     submit = SubmitField('Submit')
 
 
-class upload_file(FlaskForm):
-    file = FileField(validators=[FileRequired()])
-
 class more_details(FlaskForm):
     slug = StringField()
     voice = SelectField('Voice',choices=[], validate_choice=True)
     submit = SubmitField('Submit')
 
+class Post(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String, unique=True, nullable=False)
+    slug = db.Column(db.String, unique=True, nullable=False)
+    voice = db.Column(db.ForeignKey('voices.id'), nullable=False)
+    body = db.Column(db.String)
+    audio = db.Column(db.String)
+    created = db.Column(db.DateTime, default=datetime.utcnow)
+    audio_size = db.Column(db.Integer)
+
+class Voices(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    voice_name = db.Column(db.String, unique=True, nullable=False)
 
 
 @bp.route('/rss.xml')
 def rss():
-    db = get_db()
-    posts = db.execute(
-        'SELECT p.id, slug, title, voice, body, audio, created, audio_size FROM post p ORDER BY created DESC'
-    ).fetchall()
-    fg = build_rss(posts)
-    return Response(fg.rss_str(), mimetype='application/rss+xml')
+    pass
+    # posts = db.session.query(slug, title, voice, body, audio, created, audio_size FROM post p ORDER BY created DESC'
+    # ).all()
+    # fg = build_rss(posts)
+    # return Response(fg.rss_str(), mimetype='application/rss+xml')
 
 @bp.route('/')
 def index():
-    db = get_db()
-    posts = db.execute(
-        'SELECT p.id, slug, voice, body, audio, created, audio_size FROM post p ORDER BY created DESC'
-    ).fetchall()
-    return render_template('blog/index.html', posts=posts)
+
+    # db = get_db()
+    # posts = db.execute(
+    #     'SELECT p.id, slug, voice, body, audio, created, audio_size FROM post p ORDER BY created DESC'
+    # ).fetchall()
+     return render_template('blog/index.html', posts=posts)
 
 @bp.route('/voices', methods=('GET', 'POST'))
 def voices():
@@ -92,89 +111,50 @@ def voices():
 
 @bp.route('/create', methods=('GET', 'POST'))
 def create():
-    upload_form = UploadForm()
-    if request.method == 'POST':
-        sh = shelve.open("file")
-        sh.close()
-        print(form.file.data.filename)
-        if form.file.data:
-            sh['filename'] = form.file.data.filename
-            f = form.file.data
-            f.save(os.path.join(
-                current_app.instance_path, 'files', sh['filename']
-                ))
-#             file_data = form.file.data.read()
-        voice = form.voice.data
-        error = None
-        split_tup = os.path.splitext(filename)
-        file_name = split_tup[0]
-        file_ext = split_tup[1]
-
-        if file_ext == '.pdf':
-            pdf_parsed = parser.from_file(file_data, xmlContent=True)
-            pdf_content = pdf_parsed["content"]
-        elif file_ext == '.epub':
-            book = epub.read_epub(os.path.join(
-                current_app.instance_path, 'files', sh['filename']
-                ))
-            items = list(book.get_items_of_type(ebooklib.ITEM_DOCUMENT))
-            n = 0
-            chapters_list =[]
-            for item in items:
-                chapters_list.append((n, item.get_name()))
-                n += 1
-            chapter_form = ChapterForm()
-            chapter_form.chapters.choices = chapters_list
-            return render_template('blog/ebook.html', chapter_form=chapter_form)
-        else:
-            print('neither pdf or epub')
+    search_form = SearchForm()
 
 
-    return render_template('blog/create.html', upload_form=upload_form)
+    return render_template('blog/create.html', search_form=search_form)
 
-@bp.route('/upload_file', methods=('GET','POST'))
-def upload_file():
-    if request.method == 'GET':
-         return redirect(url_for('blog.index'))
-    if request.method == 'POST':
-        upload_form = UploadForm()
-        sh = shelve.open("file")
-        if upload_form.file.data:
-            filename = upload_form.file.data.filename
-            sh['filename'] = filename
-            f = upload_form.file.data
-            f.save(os.path.join(
-                current_app.instance_path, 'files', filename
-                ))
-    #             file_data = form.file.data.read()
-        error = None
-        split_tup = os.path.splitext(sh['filename'])
-        file_name = split_tup[0]
-        file_ext = split_tup[1]
+@bp.route('/keyword_search', methods=('POST',))
+def keyword_search():
+     search_form = SearchForm()
+     if search_form.validate_on_submit():
+        kudos_start = search_form.kudos_start.data
+        kudos_end = search_form.kudos_end.data
+        fandoms = search_form.fandoms.data
+        word_count_start = search_form.word_count_start.data
+        word_count_end = search_form.word_count_end.data
+        any_field = search_form.any_field.data
+        tags = search_form.tags.data
+        rating = search_form.rating.data
+        search = AO3.Search(any_field=any_field, tags=tags,
+                            kudos=AO3.utils.Constraint(kudos_start, kudos_end),
+                            fandoms=fandoms,
+                            word_count=AO3.utils.Constraint(word_count_start, word_count_end),
+                            rating=rating)
+        search.update()
+        choose_story = ChooseStory()
+        story_list = []
+        for story in search.results:
+            story_list.append((story.id, str(f'{story.title} - Kudos: {story.kudos} - rating: {story.rating}')))
+        choose_story.story.choices = [story_list]
+        search_results = search.results
+        return render_template('blog/search_results.html', choose_story=choose_story)
 
-        if file_ext == '.pdf':
-            pdf_parsed = parser.from_file(file_data, xmlContent=True)
-            pdf_content = pdf_parsed["content"]
-        elif file_ext == '.epub':
-            book = epub.read_epub(os.path.join(
-                current_app.instance_path, 'files', filename
-                ))
-            items = list(book.get_items_of_type(ebooklib.ITEM_DOCUMENT))
-            n = 0
-            chapters_list =[]
-            for item in items:
-                chapters_list.append((n, str(f'{item.get_name()} - {len(item.get_content())}')))
-                n += 1
-            chapter_form = ChapterForm()
-            chapter_form.title.data = book.title
-            chapter_form.chapters.choices = chapters_list
-            chapter_form.slug.data = book.title.replace(",","").replace(" ","_")
-            db = get_db()
-            voice_list = db.execute('SELECT * FROM voices;').fetchall()
-            chapter_form.voice.choices = [(voice[0],voice[1]) for voice in voice_list]
-    #         form.voice.data = defaults['voice']
 
-            return render_template('partials/chapters.html', chapter_form=chapter_form)
+@bp.route('/select_story', methods=('POST',))
+def select_story():
+        choose_story = ChooseStory()
+        story = AO3.Work(choose_story.story.data)
+        chapter_form = ChapterForm()
+        chapter_form.chapters.choices = [(idx, repr(chapter)) for idx, chapter in enumerate(story.chapters)]
+        chapter_form.chapters.choices = db.session.query(Voices).all()
+        chapter_form.slug.data = str(f'{story.title}_by_{story.authors[0].username}').replace(",", "").replace(" ", "_")
+        sh = shelve.open("work_id")
+
+        return render_template('partials/chapter_results.html', story=story, chapter_form=chapter_form)
+
 
 @bp.route('/selected_chapters', methods=('POST',))
 def selected_chapters():

@@ -1,0 +1,8 @@
+<div id="chapters">
+  	<form action="{{ url_for('blog.select_story') }}" method="post">
+     {{choose_story.csrf_token }}
+    {{choose_story.chapters.label}}<br>
+    {{choose_story.chapters(class="form-control")}}<br>
+    {{choose_story.submit(class="btn btn-primary")}}<br><br>
+    </form>
+</div>

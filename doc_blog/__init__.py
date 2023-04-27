@@ -1,7 +1,13 @@
 import os
 
 from flask import Flask
-from flask_ckeditor import CKEditor
+from flask_sqlalchemy import SQLAlchemy
+from flask_bootstrap import Bootstrap
+
+
+db = SQLAlchemy()
+bootstrap = Bootstrap()
+
 
 
 def create_app(test_config=None):
@@ -10,15 +16,11 @@ def create_app(test_config=None):
 
     app.config.from_mapping(
         SECRET_KEY='dev',
-        DATABASE=os.path.join(app.instance_path, 'ai_blog.sqlite'),
     )
+    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///podcast.db"
 
-    app.config['AUDIO_STORE_BASE_URL'] = 'https://docs-pod.cobiadigital.com'
-    app.config['BASE_URL'] = 'https://docspod.cobiadigital.com'
-
-    ckeditor = CKEditor()
-    ckeditor.init_app(app)
-
+    app.config['AUDIO_STORE_BASE_URL'] = 'https://ao3.sobrietytoolkit.com'
+    app.config['BASE_URL'] = 'https://ao3.sobrietytoolkit.com'
 
     if test_config is None:
         # load the instance config, if it exists, when not testing
@@ -33,10 +35,8 @@ def create_app(test_config=None):
     except OSError:
         pass
 
-
-
-    from . import db
     db.init_app(app)
+    bootstrap.init_app(app)
 
     from . import blog
     app.register_blueprint(blog.bp)
