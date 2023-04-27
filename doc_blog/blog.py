@@ -202,12 +202,12 @@ def selected_chapters():
             ' VALUES (?, ?, ?, ?, ?, ?)',
             (title, slug, ch_content, audio_list[0], voice, audio_list[1])
         )
-        db.commit()
-        os.system("python freeze.py")
-        os.system("git status")
-        os.system("git add -A")
-        os.system('git commit -m "' + title + '"' )
-        os.system("git push")
+        # db.commit()
+        # os.system("python freeze.py")
+        # os.system("git status")
+        # os.system("git add -A")
+        # os.system('git commit -m "' + title + '"' )
+        # os.system("git push")
 
     return redirect(url_for('blog.index'))
 

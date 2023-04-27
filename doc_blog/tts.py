@@ -143,14 +143,14 @@ def synthesize_ssml(speech_client, ssml, voice):
 
 def create_mp3(speech_client, ch_content, voice, mp3_name):
     audio = synthesize_ssml(speech_client, ch_content, voice)
-#     file_save = current_app.instance_path, 'files', mp3_name
+    #file_save = current_app.instance_path, 'files', mp3_name
     s3 = get_s3client()
     bucket = 'docs-pod'
     audiofile = io.BytesIO(audio)
     audio_size = audiofile.getbuffer().nbytes
     s3.upload_fileobj(audiofile, bucket, mp3_name)
     #debug code
-    #with open(os.path.join(current_app.static_folder, 'combined.mp3'), "wb") as out:
-    # Write the response to the output file.
-    #    out.write(combined)
+    # with open(os.path.join(current_app.static_folder, mp3_name), "wb") as out:
+    #  # Write the response to the output file.
+    #     out.write(audio)
     return (mp3_name, audio_size)
