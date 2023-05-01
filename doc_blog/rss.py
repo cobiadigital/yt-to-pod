@@ -29,28 +29,28 @@ import pytz
 # Build an RSS feed and load the podcast extension
 def build_rss(posts):
     p = Podcast()
-    p.name = "Doc to Pod"
-    p.description = """Documents to Podcast"""
+    p.name = "Archive"
+    p.description = """Archive to Podcast"""
     p.website = url_for('blog.index', _external=True)
-    p.explicit = False
+    p.explicit = True
     p.image = url_for('static', filename='docs-to-pod.png', _external=True)
-    p.copyright = "2023 Cobia Digital"
+    p.copyright = "2023 "
     p.language = "en-US"
-    p.authors = [Person("Ben Brenner", "docpod@cobiadigital.com")]
+    p.authors = [Person("Mason Paul", "mason@sobrietytoolkit.com")]
     p.feed_url = url_for('blog.rss', _external=True)
     p.category = Category("Arts", "Books")
     p.owner = p.authors[0]
 
     for post in posts:
         ep = p.add_episode(Episode())
-        ep.title = post['title']
-        ep.summary = "audio version of " + post['title']
-        ep.media = Media('https://docs-pod.cobiadigital.com/' + post['audio'],
-                        size = str(post['audio_size']),
-                        duration=timedelta(seconds=round(post['audio_size'] / 12000))
+        ep.title = post.title
+        ep.summary = "audio version of " + post.title
+        ep.media = Media('https://ao3.sobrietytoolkit.com/' + post.audio,
+                        size = str(post.audio_size),
+                        duration=timedelta(seconds=round(post.audio_size / 12000))
                         )
-        ep.id= 'https://docs-pod.cobiadigital.com/' + post['audio']
-        ep.link = url_for('blog.post_page',  id=post['id'], _external=True)
-        ep.publication_date = parse(str(post['created'])).replace(tzinfo=pytz.UTC)
+        ep.id= 'https://ao3.sobrietytoolkit.com/' + post.audio
+        ep.link = url_for('blog.post_page',  id=post.id, _external=True)
+        ep.publication_date = parse(str(post.created)).replace(tzinfo=pytz.UTC)
     return(p)
 

@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="ai_blog.sqlite" uuid="c595a11b-51ce-424b-8b42-8657f34efeae">
-      <driver-ref>sqlite.xerial</driver-ref>
+    <data-source source="LOCAL" name="db driver - podcast.db" uuid="e93646f9-bb6c-4b85-a843-05876d55f91f">
+      <driver-ref>49759e75-de64-491a-b7d0-aae2008169a0</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
-      <jdbc-url>jdbc:sqlite:$PROJECT_DIR$/instance/ai_blog.sqlite</jdbc-url>
+      <jdbc-url>jdbc:sqlite:$PROJECT_DIR$/instance/podcast.db</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
   </component>

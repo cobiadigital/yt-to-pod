@@ -1,8 +1,12 @@
 <div id="chapters">
-  	<form action="{{ url_for('blog.select_story') }}" method="post">
-     {{choose_story.csrf_token }}
-    {{choose_story.chapters.label}}<br>
-    {{choose_story.chapters(class="form-control")}}<br>
+    <form hx-post={{url_for('blog.select_story')}} hx-target="#chapters"
+		  				hx-trigger="submit"
+						hx-swap="outerHTML">
+        {{choose_story.csrf_token }}
+    {{choose_story.story.label}}<br>
+    {{choose_story.story(class="form-check")}}<br>
     {{choose_story.submit(class="btn btn-primary")}}<br><br>
     </form>
+    <div id="chapters">
+    </div>
 </div>

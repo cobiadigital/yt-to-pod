@@ -11,13 +11,21 @@
 						hx-swap="outerHTML">
 			{{ search_form.csrf_token }}
 			{{ search_form.kudos_start.label }}<br>
-			{{ search_form.kudos_start(class="form-control") }} - {{ search_form.kudos_end(class="form-control") }}<br>
-			{{ search_form.fandoms.label }}
-			{{ search_form.fandoms(class="form-control" }}
-			{{ search_form.word_count_start.label }}<br/>
-			{{ search_form.word_count_start(class="form-control") }} - {{ search_form.word_count_end(class="form-control") }}<br/>
- 			{{ search_form.rating.label }}
-			{{ search_form.rating(class="form-control") }}<br>
+                <div class="row">
+                    <div class="col-6">{{ search_form.kudos_start(class="form-control") }}</div>
+                    <div class="col-6">{{ search_form.kudos_end(class="form-control") }}</div>
+                </div>
+            {{ search_form.word_count_start.label }}<br/>
+                <div class="row">
+                    <div class="col-6">{{ search_form.word_count_start(class="form-control") }}</div>
+                    <div class="col-6">{{ search_form.word_count_end(class="form-control") }}</div>
+                </div>
+ 			{{ search_form.fandoms.label }}
+			{{ search_form.fandoms(class="form-control") }}
+             {{ search_form.any_field.label }}
+			{{ search_form.any_field(class="form-control") }}<br>
+         	{{ search_form.tags.label }}
+			{{ search_form.tags(class="form-control") }}<br>
 			{{ search_form.submit(class="btn btn-primary") }}<br><br>
 
 	</form>
@@ -26,10 +34,5 @@
 
 			</div>
     </div>
-<!--	<div class="mt-5">-->
-<!--	  <form method="post" action="{{ url_for('blog.voices') }}" >-->
-<!--		<input type="submit" value="reload voices" name="updated_voices" value="1" >-->
-<!--	  </form>-->
-<!--	</div>-->
 
 {% endblock %}

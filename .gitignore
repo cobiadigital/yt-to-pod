@@ -1,5 +1,5 @@
 venv/
-
+.env
 *.pyc
 __pycache__/
 
@@ -8,9 +8,7 @@ instance/
 .pytest_cache/
 .coverage
 htmlcov/
-tika-server-1.24.jar
 dist/
 upload/
-ai_blog/build/ckeditor/
 .secret/
 *.egg-info/

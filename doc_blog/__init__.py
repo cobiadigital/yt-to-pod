@@ -3,7 +3,10 @@ import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_bootstrap import Bootstrap
+from dotenv import load_dotenv
 
+
+load_dotenv()
 
 db = SQLAlchemy()
 bootstrap = Bootstrap()
@@ -37,6 +40,9 @@ def create_app(test_config=None):
 
     db.init_app(app)
     bootstrap.init_app(app)
+
+    with app.app_context():
+        db.create_all()
 
     from . import blog
     app.register_blueprint(blog.bp)
