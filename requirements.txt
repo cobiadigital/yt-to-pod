@@ -1,5 +1,5 @@
--e git+ssh://git@github.com/ArmindoFlores/ao3_api.git@167255c85db7bc39e967f0aacdf219bebcdc731d#egg=ao3_api
-azure-cognitiveservices-speech==1.27.0
+ao3_api
+azure-cognitiveservices-speech
 beautifulsoup4==4.12.2
 blinker==1.6.2
 boto3==1.26.122
