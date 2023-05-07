@@ -11,4 +11,9 @@ RUN pip install -r requirements.txt
 
 COPY . .
 
-CMD [ "flask", "--app", "doc_blog", "run", "--debug", "--host=0.0.0.0"]
+ENV HOST 0.0.0.0
+
+
+CMD flask --app doc_blog run --host $HOST --port $PORT
+
+#CMD [ "flask", "--app", "doc_blog", "run", "--debug", "--host=0.0.0.0", "--port=8080"]
