@@ -157,11 +157,11 @@ def selected_chapters():
         db_name = 'podcast.db'
         s3 = get_s3client()
         bucket = 'archive'
-        try:
-            response = s3.upload_file(db_path, bucket, db_name)
-        except ClientError as e:
-            logging.error(e)
-            return False
+        # try:
+        #     response = s3.upload_file(db_path, bucket, db_name)
+        # except ClientError as e:
+        #     logging.error(e)
+        #     return False
         return True
 
 

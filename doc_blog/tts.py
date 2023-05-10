@@ -27,6 +27,8 @@ def pollytext(content, voice):
     text = str(f"<p> {content} </p>")
     text = re.sub('\n+', r'</p>\n<p>', text)
     text = re.sub(u'\xa0', u' ', text)
+    text = re.sub(u'\&', u'and', text)
+
     output = re.sub(u'[\u201c\u201d]', '"', text)
     print(len(output))
     sep = '.'
