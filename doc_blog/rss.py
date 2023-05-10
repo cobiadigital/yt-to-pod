@@ -33,7 +33,7 @@ def build_rss(posts):
     p.description = """Archive to Podcast"""
     p.website = url_for('blog.index', _external=True)
     p.explicit = True
-    p.image = url_for('static', filename='docs-to-pod.png', _external=True)
+    p.image = url_for('static', filename='ao3-to-pod.png', _external=True)
     p.copyright = "2023 "
     p.language = "en-US"
     p.authors = [Person("Mason Paul", "mason@sobrietytoolkit.com")]
