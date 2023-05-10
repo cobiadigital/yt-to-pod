@@ -15,8 +15,11 @@ text = work.chapters[0].text
 with open(f"book6.epub", "wb") as file:
     file.write(work.download("HTML"))
 
+db_url = 'https://ao3.sobrietytoolkit.com/podcast.db'
+req = requests.get(db_url)
 
-
+with open(f"podcast_dl.db", "wb") as file:
+    file.write(req.content)
 import requests
 
 deploymentsEndpoint = "https://api.cloudflare.com/client/v4/accounts/{account_id}/pages/projects/{project_name}/deployments"

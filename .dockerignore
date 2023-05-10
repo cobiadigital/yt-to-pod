@@ -11,4 +11,6 @@ upload/
 .secret/
 *.egg-info/
 
+instance/
+
 .DS_Store
