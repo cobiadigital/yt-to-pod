@@ -13,9 +13,7 @@ import os
 def get_s3client():
     url = os.getenv("URL")
     aws_access_key_id = os.getenv("ACCESS_KEY_ID")
-    print(aws_access_key_id)
     aws_secret_access_key = os.getenv("ACCESS_KEY_SECRET")
-    print(aws_secret_access_key)
     s3 = boto3.client('s3',
       endpoint_url = url,
       aws_access_key_id = aws_access_key_id,
@@ -30,7 +28,6 @@ def pollytext(content, voice):
     text = re.sub(u'&', u'and', text)
 
     output = re.sub(u'[\u201c\u201d]', '"', text)
-    print(len(output))
     sep = '.'
     rest = output
 
@@ -75,8 +72,8 @@ def synthesize_ssml(speech_client, ssml, voice):
     for text_block in text_blocks:
         result = speech_client.speak_ssml_async(text_block).get()
         if result.reason == speechsdk.ResultReason.SynthesizingAudioCompleted:
-            print(text_block)
-            print("Speech synthesized for text")
+            # print(text_block)
+            # print("Speech synthesized for text")
             audio_data_list.append(result.audio_data)
             time.sleep(2)
         elif result.reason == speechsdk.ResultReason.Canceled:
