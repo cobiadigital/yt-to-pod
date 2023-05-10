@@ -149,7 +149,7 @@ def selected_chapters():
         ch_content = work.chapters[int(segment)].text
         mp3_name = str(f'{slug}-{str(segment)}.mp3')
         title = str(f'{work_title} - {str(segment)}')
-        summary = str(f'{work.summary} \n\n <h3>Chapter Summary</h3><p> {work.chapters[segment].summary}</p>')
+        summary = str(f'{work.summary} \n\n <h3>Chapter Summary</h3><p> {work.chapters[int(segment)].summary}</p>')
         audio_list = create_mp3(speech_client, ch_content, voice, mp3_name)
         db.session.add(Post(title=title, slug=slug, voice=voice, body=summary, audio=audio_list[0], audio_size=audio_list[1]))
         db.session.commit()
