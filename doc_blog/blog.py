@@ -36,6 +36,9 @@ bp = Blueprint('blog', __name__)
 
 speech_client = load_speech_client()
 
+search = None
+
+
 class SearchForm(FlaskForm):
     kudos_start = IntegerField('Kudos', default=50)
     kudos_end = IntegerField('Kudos End', default=10000)
@@ -96,6 +99,7 @@ def create():
 
 @bp.route('/keyword_search', methods=('POST',))
 def keyword_search():
+    global search
     search_form = SearchForm()
     kudos_start = search_form.kudos_start.data
     kudos_end = search_form.kudos_end.data
@@ -111,7 +115,6 @@ def keyword_search():
                         word_count=AO3.utils.Constraint(word_count_start, word_count_end),
                         )
     search.update()
-    print(search.total_results)
     choose_story = ChooseStory()
     story_list = []
     for story in search.results:
@@ -119,7 +122,27 @@ def keyword_search():
     if len(story_list) == 0:
         story_list.append((0, 'No results found'))
     choose_story.story.choices = story_list
-    return render_template('partials/search_results.html', choose_story=choose_story)
+    return render_template('partials/search_results.html', choose_story=choose_story,
+                           page=search.page,
+                           pages=search.pages
+)
+
+@bp.route('/next_page', methods=('POST',))
+def next_page():
+    global search
+    search.page += 1
+    search.update()
+    choose_story = ChooseStory()
+    story_list = []
+    for story in search.results:
+        story_list.append((story.id, str(f'{story.title} - Kudos: {story.kudos}')))
+    if len(story_list) == 0:
+        story_list.append((0, 'No results found'))
+    choose_story.story.choices = story_list
+    return render_template('partials/search_results.html', choose_story=choose_story,
+                           page=search.page,
+                           pages=search.pages
+                           )
 
 
 @bp.route('/select_story', methods=('POST',))
@@ -129,12 +152,13 @@ def select_story():
     chapter_form = ChapterForm()
     chapter_form.chapters.choices = [(idx, repr(chapter)) for idx, chapter in enumerate(g.story.chapters)]
     chapter_form.voice.choices = get_voices(speech_client)
+    chapter_form.voice.data = ('en-US-SaraNeural', 'en-US-SaraNeural')
     chapter_form.slug.data = str(f'{g.story.title}_by_{g.story.authors[0].username}').replace(",", "").replace(" ", "_")
     chapter_form.title.data = str(f'{g.story.title} by {g.story.authors[0].username}')
     chapter_form.story.data = g.story.id
-    return render_template('partials/chapter_results.html', chapter_form=chapter_form)
-
-
+    return render_template('partials/chapter_results.html',
+                           metadata=g.story.metadata,
+                           chapter_form=chapter_form)
 @bp.route('/selected_chapters', methods=('POST',))
 def selected_chapters():
     chapter_form = ChapterForm()

@@ -1,4 +1,12 @@
 <div id="chapters">
+    {% if page != pages %}
+        <p>page {{ page }} of {{ pages }}</p>
+    <a class="btn btn-primary"
+        hx-post="{{url_for('blog.next_page')}}"
+        hx-target="#chapters"
+        hx-swap="outerHTML">
+        Next Page</a>
+    {% endif %}
     <form hx-post={{url_for('blog.select_story')}} hx-target="#chapters"
 		  				hx-trigger="submit"
 						hx-swap="outerHTML">
