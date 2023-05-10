@@ -3,6 +3,11 @@ from flask import (
     Blueprint, flash, g, redirect, Response, render_template, request, url_for, send_from_directory,
     current_app, send_file
 )
+
+import logging
+import boto3
+from botocore.exceptions import ClientError
+
 from datetime import datetime
 from werkzeug.exceptions import abort
 import os
@@ -19,7 +24,7 @@ import azure.cognitiveservices.speech as speechsdk
 
 #Load app functions
 from . import db
-from .tts import create_mp3, synthesize_ssml
+from .tts import create_mp3, get_s3client
 from .tts_voices import get_voices
 from .load_azure_client import load_speech_client
 from .rss import build_rss
@@ -148,6 +153,18 @@ def selected_chapters():
         audio_list = create_mp3(speech_client, ch_content, voice, mp3_name)
         db.session.add(Post(title=title, slug=slug, voice=voice, body=summary, audio=audio_list[0], audio_size=audio_list[1]))
         db.session.commit()
+        db_path = os.path.join(current_app.instance_path, 'podcast.db')
+        db_name = 'podcast.db'
+        s3 = get_s3client()
+        bucket = 'archive'
+        try:
+            response = s3.upload_file(db_path, bucket, db_name)
+        except ClientError as e:
+            logging.error(e)
+            return False
+        return True
+
+
         # os.system("python freeze.py")
         # os.system("git status")
         # os.system("git add -A")

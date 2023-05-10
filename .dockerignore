@@ -10,3 +10,5 @@ dist/
 upload/
 .secret/
 *.egg-info/
+
+.DS_Store
