@@ -10,3 +10,4 @@ dist/
 upload/
 .secret/
 *.egg-info/
+instance/
