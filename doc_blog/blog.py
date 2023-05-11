@@ -28,6 +28,8 @@ from .tts import create_mp3, get_s3client
 from .tts_voices import get_voices
 from .load_azure_client import load_speech_client
 from .rss import build_rss
+import requests
+import io
 # from flask_frozen import Freezer
 
 # from doc_blog
@@ -153,7 +155,7 @@ def select_story():
     chapter_form.chapters.choices = [(idx, repr(chapter)) for idx, chapter in enumerate(g.story.chapters)]
     chapter_form.voice.choices = get_voices(speech_client)
     chapter_form.voice.data = ('en-US-SaraNeural', 'en-US-SaraNeural')
-    chapter_form.slug.data = str(f'{g.story.title}_by_{g.story.authors[0].username}').replace(",", "").replace(" ", "_")
+    chapter_form.slug.data = str(f'{g.story.title}_by_{g.story.authors[0].username}').replace(",", "").replace(" ", "_").replace("?", "")
     chapter_form.title.data = str(f'{g.story.title} by {g.story.authors[0].username}')
     chapter_form.story.data = g.story.id
     return render_template('partials/chapter_results.html',
@@ -177,15 +179,26 @@ def selected_chapters():
         audio_list = create_mp3(speech_client, ch_content, voice, mp3_name)
         db.session.add(Post(title=title, slug=slug, voice=voice, body=summary, audio=audio_list[0], audio_size=audio_list[1]))
         db.session.commit()
-        db_path = os.path.join(current_app.instance_path, 'podcast.db')
         db_name = 'podcast.db'
+        db_path = os.path.join(current_app.instance_path, db_name)
+        rss_name = 'rss.xml'
         s3 = get_s3client()
         bucket = 'archive'
+
         try:
             response = s3.upload_file(db_path, bucket, db_name)
         except ClientError as e:
              print(e)
-             return redirect(url_for('blog.index'))
+        try:
+            url = current_app.url_for('blog.rss')
+            req = requests.get(url)
+            rss_file = io.BytesIO(req.content)
+            response = s3.upload_fileobj(rss_file, bucket, rss_name)
+        except ClientError as e:
+            print(e)
+
+        return redirect(url_for('blog.index'))
+
 
         # os.system("python freeze.py")
         # os.system("git status")
