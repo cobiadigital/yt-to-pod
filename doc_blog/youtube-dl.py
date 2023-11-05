@@ -1,10 +1,12 @@
 import json
 import yt_dlp
 
-URL = 'https://www.youtube.com/watch?v=BaW_jenozKc'
+URL = 'https://www.youtube.com/playlist?list=PLLrbs8Zy9pRj5lGPiex8qGjvc0asc3qUP'
 
 # ℹ️ See help(yt_dlp.YoutubeDL) for a list of available options and public functions
-ydl_opts = {}
+ydl_opts = {
+    'nocheckcertificate': True,
+}
 with yt_dlp.YoutubeDL(ydl_opts) as ydl:
     info = ydl.extract_info(URL, download=False)
 

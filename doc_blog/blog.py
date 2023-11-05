@@ -8,27 +8,17 @@ import logging
 import boto3
 from botocore.exceptions import ClientError
 
-from datetime import datetime
-from werkzeug.exceptions import abort
-import os
-import AO3
-from doc_blog.tts import create_mp3
-
 from .models import Post, Voices
 
 #Load 3rd Party
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, SelectField, SelectMultipleField, IntegerField, RadioField, HiddenField
 from wtforms.validators import DataRequired
-import azure.cognitiveservices.speech as speechsdk
 
 #Load app functions
 from . import db
-from .tts import create_mp3, get_s3client
-from .tts_voices import get_voices
-from .load_azure_client import load_speech_client
 from .rss import build_rss
-import requests
+#import requests
 import io
 # from flask_frozen import Freezer
 
@@ -36,26 +26,14 @@ import io
 
 bp = Blueprint('blog', __name__)
 
-speech_client = load_speech_client()
-
 search = None
 
 
-class SearchForm(FlaskForm):
-    kudos_start = IntegerField('Kudos', default=50)
-    kudos_end = IntegerField('Kudos End', default=10000)
-    fandoms = StringField('Fandoms', default="Original Work" )
-    word_count_start = IntegerField('Word Count', default=1200)
-    word_count_end = IntegerField('Word Count End', default=50000)
-    any_field = StringField('Any Field')
-    tags = StringField('Tags')
-    # rating = SelectMultipleField('Rating',choices=[('General Audiences', 'General Audiences'),
-    #                                                ('Teen And Up Audiences', 'Teen And Up Audiences'),
-    #                                                ('Mature', 'Mature'),
-    #                                                ('Explicit', 'Explicit')], validate_choice=True)
+class GetUrlForm(FlaskForm):
+    get_url = StringField('URL of Youtube Video or Playlist')
     submit = SubmitField('Submit')
 
-class ChooseStory(FlaskForm):
+class ChooseItem(FlaskForm):
     story = RadioField('Story', choices=[])
     submit = SubmitField('Submit')
 class ChapterForm(FlaskForm):
@@ -94,40 +72,18 @@ def index():
 
 @bp.route('/create', methods=('GET', 'POST'))
 def create():
-    search_form = SearchForm()
+    get_url_form = GetUrlForm()
+    return render_template('blog/create.html', get_url_form=get_url_form)
 
-
-    return render_template('blog/create.html', search_form=search_form)
-
-@bp.route('/keyword_search', methods=('POST',))
-def keyword_search():
-    global search
-    search_form = SearchForm()
-    kudos_start = search_form.kudos_start.data
-    kudos_end = search_form.kudos_end.data
-    fandoms = search_form.fandoms.data
-    word_count_start = search_form.word_count_start.data
-    word_count_end = search_form.word_count_end.data
-    any_field = search_form.any_field.data
-    tags = search_form.tags.data
+@bp.route('/url_results', methods=('POST',))
+def url_results():
     # rating = search_form.rating.data
-    search = AO3.Search(any_field=any_field, tags=tags,
-                        kudos=AO3.utils.Constraint(kudos_start, kudos_end),
-                        fandoms=fandoms,
-                        word_count=AO3.utils.Constraint(word_count_start, word_count_end),
-                        )
-    search.update()
-    choose_story = ChooseStory()
-    story_list = []
-    for story in search.results:
-        story_list.append((story.id, str(f'{story.title} - Kudos: {story.kudos}')))
-    if len(story_list) == 0:
-        story_list.append((0, 'No results found'))
-    choose_story.story.choices = story_list
-    return render_template('partials/search_results.html', choose_story=choose_story,
-                           page=search.page,
-                           pages=search.pages
-)
+    get_url_form = GetUrlForm()
+    selected_url = get_url_form.get_url.data
+
+    return render_template('partials/url_results.html', selected_url=selected_url)
+
+
 
 @bp.route('/next_page', methods=('POST',))
 def next_page():
@@ -141,7 +97,7 @@ def next_page():
     if len(story_list) == 0:
         story_list.append((0, 'No results found'))
     choose_story.story.choices = story_list
-    return render_template('partials/search_results.html', choose_story=choose_story,
+    return render_template('partials/url_results.html', choose_story=choose_story,
                            page=search.page,
                            pages=search.pages
                            )

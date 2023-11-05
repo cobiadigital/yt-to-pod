@@ -2,7 +2,7 @@ import os
 
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from flask_bootstrap import Bootstrap
+# from flask_bootstrap import Bootstrap
 # from dotenv import load_dotenv
 import requests
 # import ssl
@@ -12,7 +12,7 @@ import requests
 # load_dotenv()
 
 db = SQLAlchemy()
-bootstrap = Bootstrap()
+# bootstrap = Bootstrap()
 
 
 
@@ -50,7 +50,7 @@ def create_app(test_config=None):
         pass
 
     db.init_app(app)
-    bootstrap.init_app(app)
+    # bootstrap.init_app(app)
 
     with app.app_context():
         db.create_all()
