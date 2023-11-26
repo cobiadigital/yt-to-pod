@@ -3,35 +3,26 @@ from flask import (
     Blueprint, flash, g, redirect, Response, render_template, request, url_for, send_from_directory,
     stream_with_context, current_app, send_file
 )
-import asyncio
-
-import logging
-import boto3
-from botocore.exceptions import ClientError
-from pathvalidate import sanitize_filename
-from .models import Post
-import os
-import keyring
-from sqlalchemy.exc import SQLAlchemyError
-
 
 #Load 3rd Party
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, SelectField, SelectMultipleField, IntegerField, RadioField, HiddenField
 from wtforms.validators import DataRequired
-
-from .ytdl import get_yt_info
-from .ytdl import get_yt_download
+from sqlalchemy.exc import SQLAlchemyError
+import keyring
+import boto3
+from botocore.exceptions import ClientError
+from pathvalidate import sanitize_filename
+from queue import Queue
 
 #Load app functions
 from . import db
 from .rss import build_rss
+from .ytdl import get_yt_info, get_yt_download
+from .models import Post
 
-#import requests
-import io
-
+import os
 import time
-import threading
 
 bp = Blueprint('blog', __name__)
 
@@ -64,27 +55,9 @@ class GetUrlForm(FlaskForm):
     get_url = StringField('URL of Youtube Video or Playlist')
     submit = SubmitField('Submit')
 
-class ChooseItem(FlaskForm):
-    story = RadioField('Story', choices=[])
-    submit = SubmitField('Submit')
-# class VideoSelectForm(FlaskForm):
-#     videos = SelectMultipleField('Videos', choices=[(1, 'option 1'), (2, 'option 2')], validate_choice=True)
-#     submit = SubmitField('Submit')
-
 class VideoSelectForm(FlaskForm):
     videos = SelectMultipleField('Videos', choices=[], validate_choice=True)
     submit = SubmitField('Submit')
-
-class DetailsForm(FlaskForm):
-    slug = StringField()
-    voice = SelectField('Voice',choices=[], validate_choice=True)
-    submit = SubmitField('Submit')
-
-class more_details(FlaskForm):
-    slug = StringField()
-    voice = SelectField('Voice',choices=[], validate_choice=True)
-    submit = SubmitField('Submit')
-
 
 @bp.route('/rss.xml')
 def rss():
@@ -96,19 +69,15 @@ def index():
     posts = db.session.query(Post).order_by(Post.created.desc()).all()
     return render_template('blog/index.html', posts=posts)
 
-
 @bp.route('/create', methods=('GET', 'POST'))
 def create():
     get_url_form = GetUrlForm()
     return render_template('blog/create.html', get_url_form=get_url_form)
 
-from queue import Queue
 
 # Global queue for SSE messages
-
-
 sse_queue = Queue()
-
+#Global variable for yt_info
 yt_info = None
 @bp.route('/url_results', methods=('POST',))
 def url_results():
@@ -170,9 +139,7 @@ def select_videos():
             # os.remove(f'downloads/{file_name}')
             task_status["track"] = file_name
             sse_queue.put(task_status)
-    return 'success', 204
-
-
+    return redirect(url_for('blog.index'))
 
 @bp.route('/sse')
 def sse():
