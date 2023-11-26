@@ -7,7 +7,7 @@ import requests
 
 db = SQLAlchemy()
 
-if os.getenv("FLASK_SECRET") is None:
+if os.getenv('FLASK_SECRET') is None:
     os.environ['FLASK_SECRET'] = keyring.get_password('ytpod', 'flask_secret'),
 
 

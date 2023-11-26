@@ -136,7 +136,7 @@ def select_videos():
                 s3.upload_file(f'downloads/{file_name}', bucket, format(file_name))
             except ClientError as e:
                 print(e)
-            # os.remove(f'downloads/{file_name}')
+            os.remove(f'downloads/{file_name}')
             task_status["track"] = file_name
             sse_queue.put(task_status)
     return redirect(url_for('blog.index'))
