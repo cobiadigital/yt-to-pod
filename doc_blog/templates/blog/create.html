@@ -6,24 +6,27 @@
 
 {% block content %}
     <div class="containter">
-
 	<form hx-post={{url_for("blog.url_results")}}
-                        hx-target="#url_results"
 		  				hx-trigger="submit"
-						hx-swap="outerHTML">
+                        hx-target="#url_results"
+                        hx-swap="outerHTML"
+						>
 			{{ get_url_form.csrf_token }}
-<div class="input-group mb-3">
-    <div class="form-floating">
-      {{ get_url_form.get_url(class="form-control", id="get_url", placeholder="https://www.youtube.com/watch?v=JJ9IX4zgyLs") }}
-      {{ get_url_form.get_url.label() }}
-    </div>
-    {{ get_url_form.submit(class="btn btn-primary", id="button-addon2") }}
-</div>
-
+        <div class="input-group mb-3">
+            <div class="form-floating">
+              {{ get_url_form.get_url(class="form-control", id="get_url", placeholder="https://www.youtube.com/watch?v=JJ9IX4zgyLs") }}
+              {{ get_url_form.get_url.label() }}
+            </div>
+            {{ get_url_form.submit(class="btn btn-primary", id="button-addon2") }}
+        </div>
     </form>
+   <div hx-ext="sse" sse-connect="/sse" sse-swap="message">
+      Contents of this box will be updated in real time
+      with every SSE message received from the chatroom.
+   </div>
         <div id="url_results">
 
+
         </div>
-</div>
 
 {% endblock %}

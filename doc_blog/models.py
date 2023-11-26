@@ -1,15 +1,14 @@
 from . import db
 from datetime import datetime
 class Post(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String, unique=True, nullable=False)
+    id = db.Column(db.Integer, unique=True, primary_key=True)
     slug = db.Column(db.String, unique=True, nullable=False)
-    voice = db.Column(db.ForeignKey('voices.id'), nullable=False)
+    title = db.Column(db.String)
+    playlist_name = db.Column(db.String)
+    playlist_id = db.Column(db.String)
+    playlist_i = db.Column(db.Integer)
+    playlist_n = db.Column(db.Integer)
+    duration_s = db.Column(db.Integer)
     body = db.Column(db.String)
     audio = db.Column(db.String)
     created = db.Column(db.DateTime, default=datetime.utcnow)
-    audio_size = db.Column(db.Integer)
-
-class Voices(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    voice_name = db.Column(db.String, unique=True, nullable=False)

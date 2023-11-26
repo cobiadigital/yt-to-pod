@@ -1,4 +1,10 @@
+
 <div id="url_results">
-    Looking up the data for
-    {{ selected_url }}
+<!-- flask wtforms -->
+    <form action="{{ url_for('blog.select_videos') }}" method="post">
+        {{ video_select_form.csrf_token }} <br>
+        {{ video_select_form.videos }}<br>
+        {{ video_select_form.submit }}
+    </form>
 </div>
+

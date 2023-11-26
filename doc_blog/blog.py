@@ -1,33 +1,64 @@
 #Load Flask modules
 from flask import (
     Blueprint, flash, g, redirect, Response, render_template, request, url_for, send_from_directory,
-    current_app, send_file
+    stream_with_context, current_app, send_file
 )
+import asyncio
 
 import logging
 import boto3
 from botocore.exceptions import ClientError
+from pathvalidate import sanitize_filename
+from .models import Post
+import os
+import keyring
+from sqlalchemy.exc import SQLAlchemyError
 
-from .models import Post, Voices
 
 #Load 3rd Party
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, SelectField, SelectMultipleField, IntegerField, RadioField, HiddenField
 from wtforms.validators import DataRequired
 
+from .ytdl import get_yt_info
+from .ytdl import get_yt_download
+
 #Load app functions
 from . import db
 from .rss import build_rss
+
 #import requests
 import io
-# from flask_frozen import Freezer
 
-# from doc_blog
+import time
+import threading
 
 bp = Blueprint('blog', __name__)
 
 search = None
 
+task_status = {"status": "not started"}
+
+def get_s3client():
+    try:
+        url = os.getenv("S3_URL")
+    except:
+        url = keyring.get_keyring('cloudflare_ytpod', 'url')
+    try:
+        aws_access_key_id = os.getenv("ACCESS_KEY_ID")
+    except:
+        aws_access_key_id = keyring.get_password('cloudflare_ytpod', "ACCESS_KEY_ID")
+    try:
+        aws_secret_access_key = os.getenv("ACCESS_KEY_SECRET")
+    except:
+        aws_secret_access_key = keyring.get_password('cloudflare_ytpod', "ACCESS_KEY_SECRET")
+
+    s3 = boto3.client('s3',
+      endpoint_url = url,
+      aws_access_key_id = aws_access_key_id,
+      aws_secret_access_key = aws_secret_access_key
+    )
+    return s3
 
 class GetUrlForm(FlaskForm):
     get_url = StringField('URL of Youtube Video or Playlist')
@@ -36,27 +67,23 @@ class GetUrlForm(FlaskForm):
 class ChooseItem(FlaskForm):
     story = RadioField('Story', choices=[])
     submit = SubmitField('Submit')
-class ChapterForm(FlaskForm):
-    chapters = SelectMultipleField('chapters', choices=[], validate_choice=True)
-    title = StringField()
-    slug = StringField()
-    voice = SelectField('Voice',choices=[], validate_choice=True)
-    story = HiddenField()
-    submit = SubmitField('Submit')
+# class VideoSelectForm(FlaskForm):
+#     videos = SelectMultipleField('Videos', choices=[(1, 'option 1'), (2, 'option 2')], validate_choice=True)
+#     submit = SubmitField('Submit')
 
+class VideoSelectForm(FlaskForm):
+    videos = SelectMultipleField('Videos', choices=[], validate_choice=True)
+    submit = SubmitField('Submit')
 
 class DetailsForm(FlaskForm):
     slug = StringField()
     voice = SelectField('Voice',choices=[], validate_choice=True)
     submit = SubmitField('Submit')
 
-
 class more_details(FlaskForm):
     slug = StringField()
     voice = SelectField('Voice',choices=[], validate_choice=True)
     submit = SubmitField('Submit')
-
-
 
 
 @bp.route('/rss.xml')
@@ -75,148 +102,103 @@ def create():
     get_url_form = GetUrlForm()
     return render_template('blog/create.html', get_url_form=get_url_form)
 
+from queue import Queue
+
+# Global queue for SSE messages
+
+
+sse_queue = Queue()
+
+yt_info = None
 @bp.route('/url_results', methods=('POST',))
 def url_results():
-    # rating = search_form.rating.data
-    get_url_form = GetUrlForm()
-    selected_url = get_url_form.get_url.data
+    task_status["status"] = "Looking up URL"
+    print(task_status)
+    # Simulate a long running task
+    sse_queue.put(task_status)
+    global yt_info
+    yt_info = get_yt_info(request.form['get_url'])
+    task_status["status"] = "completed"
+    print(task_status)
+    sse_queue.put(task_status)
+    video_select_form = VideoSelectForm()
+    for i, video in enumerate(yt_info['entries']):
+         video_select_form.videos.choices.append((i, video['title']))
+#    return '', 204
+    return render_template('partials/url_results.html', video_select_form=video_select_form )
 
-    return render_template('partials/url_results.html', selected_url=selected_url)
-
-
-
-@bp.route('/next_page', methods=('POST',))
-def next_page():
-    global search
-    search.page += 1
-    search.update()
-    choose_story = ChooseStory()
-    story_list = []
-    for story in search.results:
-        story_list.append((story.id, str(f'{story.title} - Kudos: {story.kudos}')))
-    if len(story_list) == 0:
-        story_list.append((0, 'No results found'))
-    choose_story.story.choices = story_list
-    return render_template('partials/url_results.html', choose_story=choose_story,
-                           page=search.page,
-                           pages=search.pages
-                           )
-
-
-@bp.route('/select_story', methods=('POST',))
-def select_story():
-    choose_story = ChooseStory()
-    g.story = AO3.Work(choose_story.story.data)
-    chapter_form = ChapterForm()
-    chapter_form.chapters.choices = [(idx, repr(chapter)) for idx, chapter in enumerate(g.story.chapters)]
-    chapter_form.voice.choices = get_voices(speech_client)
-    chapter_form.voice.data = ('en-US-SaraNeural', 'en-US-SaraNeural')
-    chapter_form.slug.data = str(f'{g.story.title}_by_{g.story.authors[0].username}').replace(",", "").replace(" ", "_").replace("?", "")
-    chapter_form.title.data = str(f'{g.story.title} by {g.story.authors[0].username}')
-    chapter_form.story.data = g.story.id
-    return render_template('partials/chapter_results.html',
-                           metadata=g.story.metadata,
-                           chapter_form=chapter_form)
-@bp.route('/selected_chapters', methods=('POST',))
-def selected_chapters():
-    chapter_form = ChapterForm()
-    segments = chapter_form.chapters.data
-    work_title = chapter_form.title.data
-    slug = chapter_form.slug.data
-    voice = chapter_form.voice.data
-    story_id = chapter_form.story.data
-    work = AO3.Work(story_id)
-    for segment in segments:
-        # ch_content = work.chapters[int(segment)]._soup
-        ch_content = work.chapters[int(segment)].text
-        mp3_name = str(f'{slug}-{str(segment)}.mp3')
-        title = str(f'{work_title} - {str(segment)}')
-        summary = str(f'{work.summary} \n\n <h3>Chapter Summary</h3><p> {work.chapters[int(segment)].summary}</p>')
-        audio_list = create_mp3(speech_client, ch_content, voice, mp3_name)
-        db.session.add(Post(title=title, slug=slug, voice=voice, body=summary, audio=audio_list[0], audio_size=audio_list[1]))
-        db.session.commit()
-        db_name = 'podcast.db'
-        db_path = os.path.join(current_app.instance_path, db_name)
-        rss_name = 'rss.xml'
-        s3 = get_s3client()
-        bucket = 'archive'
-
+@bp.route('/select_videos', methods=('POST',))
+def select_videos():
+    video_select_form = VideoSelectForm()
+    selected_videos = video_select_form.videos.data
+    print(selected_videos)
+    codec = 'mp3'
+    for playlist_int in selected_videos:
+        global yt_info
+        video_info = yt_info['entries'][int(playlist_int)]
+        file_name = sanitize_filename(f'''
+            {video_info["playlist_index"]}-{video_info["n_entries"]} {video_info["title"]}.{codec}
+            ''')
         try:
-            response = s3.upload_file(db_path, bucket, db_name)
-        except ClientError as e:
-             print(e)
-        try:
-            url = current_app.url_for('blog.rss')
-            req = requests.get(url)
-            rss_file = io.BytesIO(req.content)
-            response = s3.upload_fileobj(rss_file, bucket, rss_name)
-        except ClientError as e:
+            error = get_yt_download(video_info['id'], file_name)
+            print(error)
+        except Exception as e:
             print(e)
+        if not error:
+            db.session.add(
+                Post(title=video_info['title'],
+                     slug=video_info['id'],
+                     playlist_name=video_info['playlist'],
+                     playlist_id=video_info['playlist_id'],
+                     playlist_i=video_info['playlist_index'],
+                     playlist_n=video_info['n_entries'],
+                     duration_s=video_info['duration'],
+                     body=video_info['description'],
+                     audio=file_name,
+                ))
+            try:
+                db.session.commit()
+            except SQLAlchemyError as e:
+                db.session.rollback()
+                print(str(e))
+            s3 = get_s3client()
+            bucket = 'ytpod'
+            try:
+                s3.upload_file(f'downloads/{file_name}', bucket, format(file_name))
+            except ClientError as e:
+                print(e)
+            # os.remove(f'downloads/{file_name}')
+            task_status["track"] = file_name
+            sse_queue.put(task_status)
+    return 'success', 204
 
-        return redirect(url_for('blog.index'))
 
 
-        # os.system("python freeze.py")
-        # os.system("git status")
-        # os.system("git add -A")
-        # os.system('git commit -m "' + title + '"' )
-        # os.system("git push")
+@bp.route('/sse')
+def sse():
+    return Response(stream_with_context(event_stream()),
+                    mimetype="text/event-stream")
+def event_stream():
+    while True:
+        # Wait for new data in the queue
+        data = sse_queue.get()
+        yield f"message: {data}\n\n"
 
-    return redirect(url_for('blog.index'))
+def long_running_task(url):
+    task_status["status"] = "running"
+    # Simulate a long running task
+    get_yt_info()
+    time.sleep(10)
+    task_status["status"] = "completed"
 
+def task_status_stream():
+    while True:
+        yield f"data: {task_status['status']}\n\n"
+        time.sleep(1)
 
-
-
-def get_post(id):
-    post = db.first_or_404(Post, id=id)
-
-    return post
 
 @bp.route('/<int:id>/', methods=('GET',))
 def post_page(id):
-    post = get_post(id)
+    post = db.first_or_404(Post, id=id)
     audio_store_url = current_app.config.get_namespace('AUDIO_STORE_URL')
-
     return render_template('blog/post_page.html', post=post, audio_store_url=audio_store_url)
-
-
-@bp.route('/<int:id>/update', methods=('GET', 'POST'))
-def update(id):
-    post = get_post(id)
-    form = PostForm()
-    form.title.data = post['title']
-    form.slug.data = post['slug']
-    form.body.data = post['body']
-    form.ending.data = post['ending']
-
-    if request.method == 'POST':
-        title = form.title.data
-        slug = form.slug.data
-        body = form.body.data
-        error = None
-
-        if not title:
-            error = 'Title is required.'
-
-        if error is not None:
-            flash(error)
-        else:
-            db = get_db()
-            db.execute(
-                'UPDATE post SET title = ?, slug = ?, cold_open = ?, intro = ?, body = ?, ending = ?'
-                'WHERE id = ?',
-                (title, slug, cold_open, intro, body, ending, id)
-            )
-            db.commit()
-            return redirect(url_for('blog.index'))
-
-    return render_template('blog/update.html', post=post, form=form)
-
-@bp.route('/<int:id>/delete', methods=('POST',))
-def delete(id):
-    get_post(id)
-    db = get_db()
-    db.execute('DELETE FROM post WHERE id = ?', (id,))
-    db.commit()
-    return redirect(url_for('blog.index'))
-

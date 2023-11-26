@@ -1,5 +1,3 @@
-import json
-import yt_dlp
 
 URL = 'https://www.youtube.com/playlist?list=PLLrbs8Zy9pRj5lGPiex8qGjvc0asc3qUP'
 
@@ -47,4 +45,3 @@ info['duration']
 info['upload_date']
 info
 #info['thumbnails'][-1]
-

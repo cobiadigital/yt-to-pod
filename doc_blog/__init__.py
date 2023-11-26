@@ -1,5 +1,6 @@
 import os
 
+import keyring
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 # from flask_bootstrap import Bootstrap
@@ -14,21 +15,22 @@ import requests
 db = SQLAlchemy()
 # bootstrap = Bootstrap()
 
+if os.getenv("FLASK_SECRET") is None:
+    os.environ['FLASK_SECRET'] = keyring.get_keyring('ytpod', 'flask_secret'),
 
 
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
-
     app.config.from_mapping(
-        SECRET_KEY='1e9a515c032fd01ebd9e4ffGa1f6c27c',
+        SECRET_KEY=os.getenv("FLASK_SECRET"),
     )
+
+
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///podcast.db"
 
-    app.config['AUDIO_STORE_BASE_URL'] = 'https://ao3.sobrietytoolkit.com'
-    app.config['BASE_URL'] = 'https://ao3.sobrietytoolkit.com'
-
-    db_url = 'https://ao3.sobrietytoolkit.com/podcast.db'
+    app.config['AUDIO_STORE_BASE_URL'] = 'https://yttopod.cobiadigital.com'
+    app.config['BASE_URL'] = 'https://yttopod.cobiadigital.com'
 
     if test_config is None:
         # load the instance config, if it exists, when not testing
@@ -52,8 +54,13 @@ def create_app(test_config=None):
     db.init_app(app)
     # bootstrap.init_app(app)
 
-    with app.app_context():
+    @app.cli.command("create-db")
+    def create_db():
         db.create_all()
+        print("Database created.")
+
+    # with app.app_context():
+    #     db.create_all()
 
     from . import blog
     app.register_blueprint(blog.bp)
