@@ -16,7 +16,7 @@ db = SQLAlchemy()
 # bootstrap = Bootstrap()
 
 if os.getenv("FLASK_SECRET") is None:
-    os.environ['FLASK_SECRET'] = keyring.get_keyring('ytpod', 'flask_secret'),
+    os.environ['FLASK_SECRET'] = keyring.get_password('ytpod', 'flask_secret'),
 
 
 def create_app(test_config=None):
