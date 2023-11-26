@@ -34,7 +34,7 @@ def get_s3client():
     try:
         url = os.getenv("S3_URL")
     except:
-        url = keyring.get_keyring('cloudflare_ytpod', 'url')
+        url = keyring.get_password('cloudflare_ytpod', 'url')
     try:
         aws_access_key_id = os.getenv("ACCESS_KEY_ID")
     except:
