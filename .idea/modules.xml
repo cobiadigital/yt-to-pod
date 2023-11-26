@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/archive_to_pod.iml" filepath="$PROJECT_DIR$/.idea/archive_to_pod.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/yt-to-pod.iml" filepath="$PROJECT_DIR$/.idea/yt-to-pod.iml" />
     </modules>
   </component>
 </project>
