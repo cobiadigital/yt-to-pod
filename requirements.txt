@@ -1,8 +1,6 @@
 asyncio==3.4.3
 blinker==1.7.0
 boto3==1.28.78
-botocore==1.31.78
-Brotli==1.1.0
 certifi==2023.7.22
 charset-normalizer==3.3.2
 click==8.1.7
@@ -34,8 +32,6 @@ six==1.16.0
 SQLAlchemy==2.0.23
 tinytag==1.10.1
 typing_extensions==4.8.0
-urllib3==2.0.7
-websockets==12.0
 Werkzeug==3.0.1
 WTForms==3.1.1
 yt-dlp==2023.10.13
