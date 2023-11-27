@@ -44,10 +44,10 @@ def get_yt_download(url, file_name):
             'temp': 'temp',
             'home': 'downloads',
         },
-    # 'postprocessors': [{  # Extract audio using ffmpeg
-    #     'key': 'FFmpegExtractAudio',
-    #     'preferredcodec': 'mp3',
-    # }]
+    'postprocessors': [{  # Extract audio using ffmpeg
+        'key': 'FFmpegExtractAudio',
+        'preferredcodec': 'mp3',
+    }]
     }
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         error = ydl.download(url)

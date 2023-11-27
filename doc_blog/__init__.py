@@ -8,7 +8,7 @@ import requests
 db = SQLAlchemy()
 
 if os.getenv('FLASK_SECRET') is None:
-    os.environ['FLASK_SECRET'] = keyring.get_password('ytpod', 'flask_secret'),
+    os.environ['FLASK_SECRET'] = keyring.get_password('ytpod', 'FLASK_SECRET')
 
 
 def create_app(test_config=None):
@@ -33,15 +33,7 @@ def create_app(test_config=None):
 
 
     # ensure the instance folder exists
-    db_url = 'https://ao3.sobrietytoolkit.com/podcast.db'
 
-    try:
-        os.makedirs(app.instance_path)
-        req = requests.get(db_url)
-        with open(os.path.join(app.instance_path, 'podcast.db'), "wb") as file:
-            file.write(req.content)
-    except OSError:
-        pass
 
     db.init_app(app)
     # bootstrap.init_app(app)

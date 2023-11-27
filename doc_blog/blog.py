@@ -106,7 +106,7 @@ def select_videos():
         global yt_info
         video_info = yt_info['entries'][int(playlist_int)]
         file_name = sanitize_filename(f'''
-            {video_info["playlist_index"]}-{video_info["n_entries"]} {video_info["title"]}.{codec}
+            {video_info["playlist_index"]}-{video_info["n_entries"]} {video_info["title"]}
             ''')
         try:
             error = get_yt_download(video_info['id'], file_name)
@@ -114,6 +114,7 @@ def select_videos():
         except Exception as e:
             print(e)
         if not error:
+            file_name = f'{file_name}.{codec}'
             db.session.add(
                 Post(title=video_info['title'],
                      slug=video_info['id'],
